@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='slrfield',
-    version='0.0.1',
+    version='0.0.2',
     long_description_content_type='text/markdown',
     description='A package to handle the SLR(Satellite Laser Ranging) data',
     long_description=open('README.md', 'rb').read().decode('utf-8'),
@@ -22,6 +22,6 @@ setup(
     install_requires=[
         'scipy',
         'numpy',
-        'astropy'
+        'astropy>=4.0.1'
         ],
 )

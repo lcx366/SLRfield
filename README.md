@@ -156,7 +156,9 @@ The azimuth, altitude, distance of a target w.r.t. a given station, and the time
 
 Coordinates of station can either be ***geocentric***(x, y, z) in meters or ***geodetic***(lon, lat, height) in degrees and meters. The default coordinates type is set to ***geodetic***.
 
-#### For geodetic(lon, lat, height) station coordinates 
+Note: The first use of slrfield will call [astropy](https://www.astropy.org) to automatically download the **Earth Orientation Parameters** file, so it may take a long time to output the prediction file.
+
+#### For geodetic(lon, lat, height) station coordinates
 
 ```python
 t_start = '2007-06-01 17:06:40'
@@ -180,9 +182,8 @@ cpf_data_edc.pred(station,t_start,t_end,t_increment,coord_type = 'geocentric',mo
 
 ## Change log
 
-- **0.0.1 — Apr 21,  2020**
-- The ***slrfield*** package was released.
-  
+- **0.0.2 — Apr 21,  2020**
+  - The ***slrfield*** package was released.
 
 ## Next release
 
