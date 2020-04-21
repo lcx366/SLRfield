@@ -7,7 +7,7 @@ Currently, operations on SLR data include:
 
 2. Parse the CPF ephemeris file
 
-3. Predict the azimuth, altitude, distance of the target, and the time of flight for laser pulse etc. given the coordinates of the station 
+3. Predict the azimuth, altitude, distance of the target, and the time of flight for laser pulse etc. given the coordinates of a station 
 
 ## How to Install
 
