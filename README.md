@@ -39,8 +39,8 @@ Downloading ...  compassi3_cpf_200412_6031.sha ... 226 Transfer complete.
  ...,
  'CPF/CDDIS/2020-04-20/compassi5_cpf_200412_6031.sha',
  'CPF/CDDIS/2020-04-20/compassi3_cpf_200412_6031.sha']
-# From EDC
-# cpf_files_all = cpf_download(source = 'EDC')
+>>> # From EDC
+>>> # cpf_files_all = cpf_download(source = 'EDC')
 ```
 #### Download a set of specified targets
 
