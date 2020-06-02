@@ -22,6 +22,9 @@ setup(
     install_requires=[
         'scipy',
         'numpy',
+        'pandas',
+        'spacetrack',
+        'skyfield>=1.21'
         'astropy>=4.0.1'
         ],
 )
