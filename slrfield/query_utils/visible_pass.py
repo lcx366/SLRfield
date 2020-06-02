@@ -129,7 +129,7 @@ def eclipsed(sat,sun,earth,t):
     shadow = CosTheta < -np.sqrt(sat_geo_d**2-Radius_earth**2)/sat_geo_d*CosPenumbra + (sat_geo_d/Radius_earth)*SinPenumbra
     return shadow
 """
-def visible_pass(start_time,end_time,site,timezone=0,twilight='nautical',visible_duration=120):
+def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautical',visible_duration=120):
     '''
     Calculate the visible time period of satellite transit.
 
@@ -142,6 +142,7 @@ def visible_pass(start_time,end_time,site,timezone=0,twilight='nautical',visible
 
     Parameters:
     timezone -> [int, optional, default=0] time zone; if 0, then UTC is used.
+    cutoff -> [float, optional, default=10] Satellite Cutoff Altitude Angle
     twilight -> [str,int,or float, optional, default='nautical'] dark sign; if 'dark', then the solar cutoff angle is less than -18 degrees;
     if 'astronomical', then less than -12 degrees; if 'nautical', then less than -6 degrees; if 'civil', then less than -0.8333 degrees;
     alternatively, it also can be set to a specific number, for example, 4 degrees.
@@ -219,7 +220,7 @@ def visible_pass(start_time,end_time,site,timezone=0,twilight='nautical',visible
     for sat in sats:
         visible_flag = False
         noradid = sat.model.satnum
-        passes = next_pass(ts,t_start,t_end,sat,observer)
+        passes = next_pass(ts,t_start,t_end,sat,observer,cutoff)
         if not passes: 
             continue
         else:
