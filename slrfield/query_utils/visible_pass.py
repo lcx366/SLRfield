@@ -1,7 +1,8 @@
 from glob import glob
 from pathlib import Path
 from os import path,mkdir,remove
-from urllib.request import urlretrieve
+from urllib.request import urlretrieve,ContentTooShortError
+from wget import download
 
 import numpy as np
 import pandas as pd
@@ -94,41 +95,7 @@ def next_pass(ts,t_start,t_end,sat,site,cutoff = 10):
             pass_set = t_set[sat_above_horizon][-1]   
         passes.append([pass_rise.utc_iso(),pass_set.utc_iso()])     
     return passes
-"""
-def eclipsed(sat,sun,earth,t):
-    '''
-    Determine if a satellite is in the earth shadow。
 
-    Usage: shadow = eclipsed(sat,sun,earth,t)
-
-    Inputs:
-    sat -> [object of class Skyfield satellite] satellite from tle
-    sun -> [object of class Skyfield planets] sun from JPL ephemeris, such as DE421 and DE430
-    earth -> [object of class Skyfield planets] Earth from JPL ephemeris
-    t -> [object of class Skyfield Time] time moment or a set of time moments;
-
-    Outputs:
-    shadow -> [bool or list of bool] If True, then the satellite is in earth shadow; if False, then outside the shadow. 
-    '''
-    # Satellite position relative to the geocenter in ICRS
-    sat_geo = sat.at(t)
-    sat_geo_xyz = sat_geo.position.km
-    sat_geo_d = sat_geo.distance().km
-    # Solar position relative to the geocenter in ICRS
-    sun_geo = (earth).at(t).observe(sun).apparent()
-    sun_geo_xyz = sun_geo.position.km
-    sun_geo_d = sun_geo.distance().km
-    
-    Radius_sun = R_sun.to(u.km).value
-    Radius_earth = R_earth.to(u.km).value
-    
-    SinPenumbra = (Radius_sun - Radius_earth)/sun_geo_d
-    CosPenumbra = np.sqrt(1 - SinPenumbra**2)
-    
-    CosTheta = np.sum(sat_geo_xyz*sun_geo_xyz,axis=0)/(sun_geo_d*sat_geo_d)*CosPenumbra + (sat_geo_d/Radius_earth)*SinPenumbra
-    shadow = CosTheta < -np.sqrt(sat_geo_d**2-Radius_earth**2)/sat_geo_d*CosPenumbra + (sat_geo_d/Radius_earth)*SinPenumbra
-    return shadow
-"""
 def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautical',visible_duration=120):
     '''
     Calculate the visible time period of satellite transit.
@@ -166,8 +133,12 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
 
     if not path.exists(de430):
         print('Downloading the JPL ephemeris de430.bsp',end=' ... ')
-        urlretrieve(url, de430)
-        print('Finished')
+        try:
+            urlretrieve(url, de430)
+            print('Finished')
+        except ContentTooShortError:
+            print('Download failed using urlretrieve. Try to download using wget tool.')
+            download(url, de430)  
 
     ts = load_time.timescale()
     planets = load_eph('de430.bsp')
@@ -248,7 +219,7 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
                 t_visible_1 = (Time(t_visible[-1])+timezone*u.hour).iso
                 during = round((Time(t_visible[-1]) - Time(t_visible[0])).sec)
                 if during >= visible_duration:
-                    outfile0.write('{:s},{:s},{:d},{:d}\n'.format(t_visible_0,t_visible_1,noradid,during))
+                    outfile0.write('{:s},{:s},{:d},{:d}\n'.format(t_visible_0,t_visible_1,noradid,int(during)))
             
             # Generate a one-day prediction file
             if Time(pass_end) < t_start + 1: 
