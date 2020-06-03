@@ -40,9 +40,9 @@ def discos_query(COSPARID=None,NORADID=None,ObjectClass=None,Decayed=None,DecayD
     if not path.exists(direc): makedirs(direc)
     if not path.exists(tokenfile):
         token = input('Please input the DISCOS tokens(which can be achieved from https://discosweb.esoc.esa.int/tokens): ')
-        outfile = open(tokenfile,'w')
-        outfile.write(token)
-        outfile.close()
+        outfile_token = open(tokenfile,'w')
+        outfile_token.write(token)
+        outfile_token.close()
     else:
         infile = open(tokenfile,'r')
         token = infile.readline()
