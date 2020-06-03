@@ -1,5 +1,6 @@
 import numpy as np
-import os,glob
+from os import path,mkdir,makedirs,remove
+from glob import glob
 from pathlib import Path
 from spacetrack import SpaceTrackClient
 
@@ -37,8 +38,8 @@ def tle_download(noradids):
     direc = home + '/src/spacetrack-data/'
     loginfile = direc + 'spacetrack-login'
 
-    if not os.path.exists(direc): makedirs(direc)
-    if not os.path.exists(loginfile):
+    if not path.exists(direc): makedirs(direc)
+    if not path.exists(loginfile):
         username = input('Please input the username for Space-Track(which can be created at https://www.space-track.org/auth/login): ')
         password = input('Please input the password for Space-Track: ')
         outfile = open(loginfile,'w')
@@ -56,12 +57,12 @@ def tle_download(noradids):
     
     # save TLE/3LE data to files
     dir_TLE = 'TLE/'   
-    fileList_TLE = glob.glob(dir_TLE+'*')
-    if os.path.exists(dir_TLE):
+    fileList_TLE = glob(dir_TLE+'*')
+    if path.exists(dir_TLE):
         for file in fileList_TLE:
-            os.remove(file)
+            remove(file)
     else:
-        os.mkdir(dir_TLE) 
+        mkdir(dir_TLE) 
         
     valid_ids = []
     file_3le = open(dir_TLE+'satcat_3le.txt','w')
