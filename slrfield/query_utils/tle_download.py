@@ -66,13 +66,14 @@ def tle_download(noradids):
         
     valid_ids = []
     file_3le = open(dir_TLE+'satcat_3le.txt','w')
+    print('Downloading the TLE files',end=' ... ')
     for line in lines_3le:
         words = line.split()
         if words[0] == '2': valid_ids.append(words[1])
         file_3le.write(line+'\n')
     file_3le.close()  
+    print('Complete')
     missing_ids = list(set(noradids)-set(valid_ids))
-    if missing_ids: print('TLE data for these targets are not avaliable: ',missing_ids) 
-    print('Complete the download of TLE data.\n ')
+    if missing_ids: print('Note: TLE data for these targets are not avaliable: ',missing_ids) 
 
     return dir_TLE+'satcat_3le.txt'       

@@ -147,6 +147,8 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     print(load_time.log)
     print(load_eph.log)
 
+    print('Calculating visible passes and one-day predictions for satellites transit.')
+
     if twilight == 'dark':
         sun_alt_cutoff = -18
     elif twilight == 'astronomical':
@@ -179,7 +181,6 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
             remove(file)
     else:
         mkdir(dir_prediction)
-    
 
     filename0 = 'VisiblePasses_bysat.csv'  
     filename1 = 'VisiblePasses_bydate.csv'
@@ -252,4 +253,4 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
         date_flag = VisiblePasses[header[0]].str.contains(date,na=False)
         temp.append(VisiblePasses[date_flag].sort_values(by=[header[0]]).append(pd.Series(dtype=object), ignore_index=True)) 
     pd.concat(temp).to_csv(dir_prediction+'VisiblePasses_bydate.csv',index=False,mode='w')
-    print('Complete the calculation of the visible time period of satellite transit.')    
+    print('Complete')    
