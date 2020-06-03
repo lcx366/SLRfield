@@ -20,7 +20,7 @@ setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=[
-        'wget'
+        'wget',
         'scipy',
         'numpy',
         'pandas',
