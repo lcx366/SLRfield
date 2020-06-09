@@ -23,9 +23,9 @@ def discos_buildin_filter(params,expr):
     params_upgrade -> [dictionary] upgraded variable params in function discos_query
     '''
     if 'filter' in params.keys(): 
-        params['filter'] += '&(' + temp + ')'
+        params['filter'] += '&(' + expr + ')'
     else:
-        params['filter'] = temp 
+        params['filter'] = expr 
     return params  
 
 def discos_query(COSPARID=None,NORADID=None,ObjectClass=None,Payload=None,Decayed=None,DecayDate=None,Mass=None,Shape=None,Length=None,Height=None,Depth=None,RCSMin=None,RCSMax=None,RCSAvg=None,sort=None,outfile=True):

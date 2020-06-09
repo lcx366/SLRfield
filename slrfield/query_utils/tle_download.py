@@ -66,7 +66,7 @@ def tle_download(noradids):
         
     valid_ids = []
     file_3le = open(dir_TLE+'satcat_3le.txt','w')
-    print('\nDownloading the TLE files',end=' ... ')
+    print('\nDownloading the TLE/3LE data',end=' ... ')
     for line in lines_3le:
         words = line.split()
         if words[0] == '2': valid_ids.append(words[1])

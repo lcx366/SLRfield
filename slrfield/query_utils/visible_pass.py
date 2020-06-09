@@ -129,7 +129,7 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     load_eph = Loader(direc_eph)
     load_time = Loader(direc_time)
 
-    print('\nDownloading the ephemeris file JPL DE430 and time files',end=' ... ')
+    print('\nDownloading JPL ephemeris and time files',end=' ... \n')
 
     # URL of JPL DE430
     url = 'http://www.shareresearch.me/wp-content/uploads/2020/05/de430.bsp' 
@@ -138,7 +138,7 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     url = 'https://repos.cosmos.esa.int/socci/projects/SPICE_KERNELS/repos/juice/browse/kernels/spk/de430.bsp'
     '''
     if not path.exists(de430):
-        print('Downloading the JPL ephemeris file de430.bsp',end=' ... ')
+        print('Downloading de430.bsp',end=' ... ')
         try:
             urlretrieve(url, de430)
             print('Finished')
@@ -154,7 +154,7 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     print(load_time.log)
     print(load_eph.log)
 
-    print('\nCalculating one-day predictions and multiple-day visible passes for targets', end=' ... ')
+    print('\nCalculating one-day predictions and multiple-day visible passes for targets', end=' ... \n')
 
     if twilight == 'dark':
         sun_alt_cutoff = -18
@@ -249,9 +249,9 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
         else:
             outfile0.write('\n')
         outfile.close() 
-        print('Generate one-day prediction file for target {:s}'.format(str(noradid)))
+        print('Generate one-day prediction for target {:s}'.format(str(noradid)))
     outfile0.close() 
-    print('Generate multiple-day visible passes file for all targets.')
+    print('Generate multiple-day visible passes for all targets.')
     
     # Sort by the start time of the visible passes
     dates,temp = [],[]
@@ -263,4 +263,4 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
         date_flag = VisiblePasses[header[0]].str.contains(date,na=False)
         temp.append(VisiblePasses[date_flag].sort_values(by=[header[0]]).append(pd.Series(dtype=object), ignore_index=True)) 
     pd.concat(temp).to_csv(dir_prediction+'VisiblePasses_bydate.csv',index=False,mode='w')
-    print('Over')    
+    print('Over!')    
