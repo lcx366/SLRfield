@@ -237,7 +237,7 @@ csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as 
 
 ## Change log
 
-- **0.1.4 — Jun 9,  2020**
+- **0.1.5 — Jun 9,  2020**
 
   Expanded the following functions：
 

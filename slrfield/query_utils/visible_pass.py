@@ -143,10 +143,10 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
             urlretrieve(url, de430)
             print('Finished')
         except ContentTooShortError:
-            print('Download failed using urlretrieve. Try to download using wget tool.')
+            print('\nDownload failed using urlretrieve. Try to download using wget tool.')
             download(url, de430)  
 
-    print('Downloading the time files',end=' ... ')
+    print('Downloading the time files',end=' ... \n')
     ts = load_time.timescale()
     planets = load_eph('de430.bsp')
     
