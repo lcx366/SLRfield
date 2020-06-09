@@ -20,9 +20,9 @@ def t_list(ts,t_start,t_end,t_step=60):
     t = t_list(ts,t_start,t_end,t_step)
 
     Inputs:
-    ts -> [object of class Skyfield time scale] Skyfield time system; it constitutes 'deltat.data', 'deltat.preds', and 'Leap_Second.dat'
-    t_start -> [object of class Astropy Time] start time, such as Time('2020-06-01 00:00:00')
-    t_end -> [object of class Astropy Time] end time, such as Time('2020-06-30 00:00:00') 
+    ts -> [Skyfield time scale] Skyfield time scale system; it is constitutive of 'deltat.data', 'deltat.preds', and 'Leap_Second.dat'
+    t_start -> [object of class Astropy Time] Start time, such as Time('2020-06-01 00:00:00')
+    t_end -> [object of class Astropy Time] End time, such as Time('2020-06-30 00:00:00') 
 
     Parameters:
     t_step -> [int, optional, default = 60] time step[seconds] 
@@ -37,33 +37,33 @@ def t_list(ts,t_start,t_end,t_step=60):
        
 def next_pass(ts,t_start,t_end,sat,site,cutoff = 10):
     '''
-    Generate the time period for target transit.
+    Generate the space target passes in a time period.
 
     Usage: 
     passes = next_pass(ts,t_start,t_end,sat,site,cutoff)
 
     Inputs:
-    ts -> [object of class Skyfield time scale] Skyfield time system; it constitutes 'deltat.data', 'deltat.preds', and 'Leap_Second.dat'
-    t_start -> [object of class Astropy Time] start time, such as Time('2020-06-01 00:00:00')
-    t_end -> [object of class Astropy Time] end time, such as Time('2020-06-30 00:00:00') 
-    sat -> [object of class Skyfield satellite] satellite from tle
-    site -> [object of class Skyfield Topos] station
+    ts -> [Skyfield time scale] Skyfield time scale system; it is constitutive of 'deltat.data', 'deltat.preds', and 'Leap_Second.dat'
+    t_start -> [object of class Astropy Time] Start time, such as Time('2020-06-01 00:00:00')
+    t_end -> [object of class Astropy Time] End time, such as Time('2020-06-30 00:00:00') 
+    sat -> [object of class Skyfield satellite] Space target
+    site -> [object of class Skyfield Topos] Station
 
     Parameters:
-    cutoff -> [float, optional, default=10] Satellite Cutoff Altitude Angle
+    cutoff -> [float, optional, default=10] Cutoff altitude angle
 
     Outputs:
-    t -> [list of object of class Skyfield Time] list of time moments
+    t -> [list of object of class Skyfield Time] List of time moments
     '''
     passes = []
     
-    # Calculate the orbital period[minutes] of the satellite relative to the rotating earth
+    # Approximately calculate the orbital period[minutes] of a target relative to the rotating Earth
     P = 2*np.pi/(sat.model.no - np.pi/(12*60)) 
     # Determine the time step[seconds]
     t_step = int(np.round(60*np.sqrt(P/120))) 
     t = t_list(ts,t_start,t_end,t_step)
 
-    # Satellite position relative to the station in ICRS
+    # Calculate the target position relative to the station in ICRS
     sat_site = (sat - site).at(t)
     alt_sat, az_sat, distance_sat = sat_site.altaz()
     sat_above_horizon = alt_sat.degrees > cutoff
@@ -98,27 +98,28 @@ def next_pass(ts,t_start,t_end,sat,site,cutoff = 10):
 
 def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautical',visible_duration=120):
     '''
-    Calculate the visible time period of satellite transit.
+    Generate the visible passes of space targets in a time period.
 
-    Usage: visible_pass(start_time,end_time,site,timezone=8)
+    Usage: 
+    visible_pass(start_time,end_time,site,timezone=8)
 
     Inputs:
     start_time -> [str] start time, such as '2020-06-01 00:00:00'
     end_time -> [str] end time, such as '2020-07-01 00:00:00'
-    site -> [list of str] geodetic coordinates of a station, such as ['25.03 N','102.80 E','1987.05']
+    site -> [list of str] geodetic coordinates of a station, such as ['21.03 N','157.80 W','1987.05']
 
     Parameters:
-    timezone -> [int, optional, default=0] time zone; if 0, then UTC is used.
+    timezone -> [int, optional, default=0] time zone, such as -10; if 0, then UTC is used.
     cutoff -> [float, optional, default=10] Satellite Cutoff Altitude Angle
-    twilight -> [str,int,or float, optional, default='nautical'] dark sign; if 'dark', then the solar cutoff angle is less than -18 degrees;
+    twilight -> [str, or float, optional, default='nautical'] Dark sign or solar cutoff angle; if 'dark', then the solar cutoff angle is less than -18 degrees;
     if 'astronomical', then less than -12 degrees; if 'nautical', then less than -6 degrees; if 'civil', then less than -0.8333 degrees;
-    alternatively, it also can be set to a specific number, for example, 4 degrees.
-    visible_duration -> [int, optional, default=120] visible duration in seconds
+    alternatively, it also can be set to a specific number, for example, 4.0 degrees.
+    visible_duration -> [int, optional, default=120] Duration[seconds] of a visible pass
 
     Outputs:
-    VisiblePasses_bysat.csv -> csv-format file of visible passes in sort of satellite
-    VisiblePasses_bydate.csv -> csv-format file of visible passes in sort of date
-    xxxx.txt -> one-day prediction file for each satellite
+    VisiblePasses_bysat.csv -> csv-format files that record visible passes in sort of target
+    VisiblePasses_bydate.csv -> csv-format files that record visible passes in sort of date
+    xxxx.txt -> one-day prediction files for targets
     '''
     home = str(Path.home())
     direc_eph = home + '/src/skyfield-data/ephemeris/'
@@ -128,11 +129,16 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     load_eph = Loader(direc_eph)
     load_time = Loader(direc_time)
 
-    # URL of DE430
-    url = 'http://www.shareresearch.me/wp-content/uploads/2020/05/de430.bsp' 
+    print('\nDownloading the ephemeris file JPL DE430 and time files',end=' ... ')
 
+    # URL of JPL DE430
+    url = 'http://www.shareresearch.me/wp-content/uploads/2020/05/de430.bsp' 
+    '''
+    url = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp'
+    url = 'https://repos.cosmos.esa.int/socci/projects/SPICE_KERNELS/repos/juice/browse/kernels/spk/de430.bsp'
+    '''
     if not path.exists(de430):
-        print('Downloading the JPL ephemeris de430.bsp',end=' ... ')
+        print('Downloading the JPL ephemeris file de430.bsp',end=' ... ')
         try:
             urlretrieve(url, de430)
             print('Finished')
@@ -140,14 +146,15 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
             print('Download failed using urlretrieve. Try to download using wget tool.')
             download(url, de430)  
 
+    print('Downloading the time files',end=' ... ')
     ts = load_time.timescale()
     planets = load_eph('de430.bsp')
     
-    # Output information about the time system file and ephemeris file
+    # Print information about the time system file and ephemeris file
     print(load_time.log)
     print(load_eph.log)
 
-    print('Calculating visible passes and one-day predictions for satellites transit.')
+    print('\nCalculating one-day predictions and multiple-day visible passes for targets', end=' ... ')
 
     if twilight == 'dark':
         sun_alt_cutoff = -18
@@ -197,8 +204,8 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
             continue
         else:
             outfile = open(dir_prediction+ str(noradid) + '.txt','w')
-            outfile.write('# {:18s} {:8s} {:8s} {:8s} {:8s} {:10s} {:14s} {:7s} \n'.format('Date and Time(UTC)','Alt[deg]','Az[deg]','Ra[h]','Dec[deg]','Range[km]','Solar Alt[deg]','Visible'))
-            
+            outfile.write('# {:18s} {:8s} {:8s} {:8s} {:8s} {:10s} {:14s} {:7s} \n'.format('Date and Time(UTC)','Alt[deg]','Az[deg]','Ra[h]','Dec[deg]','Range[km]','Solar Alt[deg]','Visible')) 
+
         for pass_start,pass_end in passes:
             t = t_list(ts,Time(pass_start),Time(pass_end),1)
             sat_observer = (sat - observer).at(t)
@@ -227,6 +234,7 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
                 for i in range(len(t)):
                     outfile.write('{:20s} {:>8.4f} {:>8.4f} {:>8.5f} {:>8.4f} {:>10.4f} {:>10.4f} {:>7d} \n'.format(t.utc_strftime('%Y-%m-%d %H:%M:%S')[i],sat_alt.degrees[i],sat_az.degrees[i],sat_ra.hours[i],sat_dec.degrees[i],sat_distance.km[i],sun_alt.degrees[i],visible[i]))
                 outfile.write('\n')
+
         
             '''
             # Generate a one-day prediction in visibility period
@@ -240,10 +248,12 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
             outfile0.write('{:s},{:s},{:d}\n\n'.format('','',noradid))
         else:
             outfile0.write('\n')
-        outfile.close()
+        outfile.close() 
+        print('Generate one-day prediction file for target {:s}'.format(str(noradid)))
     outfile0.close() 
+    print('Generate multiple-day visible passes file for all targets.')
     
-    # Sort satellites according to the start time of the visible time period
+    # Sort by the start time of the visible passes
     dates,temp = [],[]
     VisiblePasses = pd.read_csv(dir_prediction+filename0,dtype=object)
     for date in VisiblePasses[header[0]]:
@@ -253,4 +263,4 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
         date_flag = VisiblePasses[header[0]].str.contains(date,na=False)
         temp.append(VisiblePasses[date_flag].sort_values(by=[header[0]]).append(pd.Series(dtype=object), ignore_index=True)) 
     pd.concat(temp).to_csv(dir_prediction+'VisiblePasses_bydate.csv',index=False,mode='w')
-    print('Complete')    
+    print('Over')    

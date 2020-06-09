@@ -5,29 +5,25 @@ This subpackage defines the following functions:
 
 # ============================ query ========================= #
 
-download_bycurrent - Download the latest CPF ephemeris files at the current moment
+discos_buildin_filter - A subfunction dedicated to the function discos_query. It is used for upgrading the variable params(type of dictionary) in discos_query based on params and expr. 
+If key 'filter' does not exist in params, then the upgraded params will become params['filter'] = expr; otherwise, the upgraded params will become params['filter'] += '&(' + expr + ')'
 
-download_bydate - Download the latest CPF ephemeris files before a specific time
+discos_query - Query space targets that meet the requirements by setting a series of specific parameters from the [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) database.
 
-cpf_download - It combines the features of download_bycurrent and download_bydate. 
-If the date and time are not given, then the latest cpf ephemeris files at the current time are downloaded; 
-otherwise, download the latest cpf ephemeris files before the given date and time.
+download_satcat - Download or update the satellites catalog file from www.celestrak.com
 
-try_download - Connect to the server and try to download the cpf ephemeris files
+celestrak_query - Query space targets that meet the requirements by setting a series of specific parameters from the the [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) database and the [CELESTRAK](https://celestrak.com) database.
 
 # ======================== tle_download ====================== #
 
-read_cpf - Parse a single CPF ephemeris file
-
-read_cpfs - Parse a set of CPF ephemeris files
+tle_download - Download the TLE/3LE data from https://www.space-track.org
 
 # ======================== visible_pass ====================== #
 
-cpf_interpolate - Interpolate the CPF ephemeris and make the prediction
+t_list - Generate a list of time moments based on start time, end time, and time step.
 
-interp_ephem - Interpolate the CPF ephemeris
+next_pass - Generate the space target passes in a time period.
 
-itrs2horizon - Convert cartesian coordinates of targets in ITRF to spherical coordinates in topocentric reference frame for a specific station
+visible_pass - Generate the visible passes of space targets in a time period.
 
-iso2sod - Calculate Second of Day from 'iso-formatted' time sets, such as '2017-01-02 03:04:05.678'
 '''

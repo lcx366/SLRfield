@@ -13,7 +13,7 @@ def tle_download(noradids):
     tlefile = tle_download('satno.txt')
 
     Inputs:
-    noradids -> [str, int, list of str, or list of int] NORADID; it can be a single NORADID, list of NORADID, or a file containing a set of NORADID.
+    noradids -> [str, int, list of str/int] NORADID of space targets; it can be a single NORADID, list of NORADID, or a file containing a set of NORADID.
     The form and format of the file is as follows:
     #satno
     12345
@@ -66,7 +66,7 @@ def tle_download(noradids):
         
     valid_ids = []
     file_3le = open(dir_TLE+'satcat_3le.txt','w')
-    print('Downloading the TLE files',end=' ... ')
+    print('\nDownloading the TLE files',end=' ... ')
     for line in lines_3le:
         words = line.split()
         if words[0] == '2': valid_ids.append(words[1])

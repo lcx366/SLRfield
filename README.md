@@ -4,10 +4,11 @@ This package is an archive of scientific routines for data processing related to
 Currently, operations on SLR data include:
 
 1. Automatically download the CPF(Consolidated Prediction Format) ephemeris file
-
 2. Parse the CPF ephemeris file
-
-3. Predict the azimuth, altitude, distance of the target, and the time of flight for laser pulse etc. given the coordinates of a station 
+3. Predict the azimuth, altitude, distance of the target, and the time of flight for laser pulse etc. given the coordinates of a station
+4. Automatically download TLE/3LE data from [SPACETRACK](https://www.space-track.org)
+5. Pick out space targets that meets specific demands from [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) and [CELESTRAK](https://celestrak.com) database by setting a series of parameters, such as mass, shape, RCS(Radar Cross Section), and orbit altitude etc.
+6. Calculate one-day prediction and multiple-day visible passes for space targets based on TLE/3LE data
 
 ## How to Install
 
@@ -180,21 +181,85 @@ station = [4331283.557, 567549.902,4633140.353] # geocentric(x, y, z) coordinate
 cpf_data_edc.pred(station,t_start,t_end,t_increment,coord_type = 'geocentric',mode='geometric')
 ```
 
+### Pick out space targets
+
+Pick out space targets that meets specific physical characteristics from the [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) database. The DISCOS database mainly provides the geometric information of the spatial target, such as shape, size and mass, etc. Before using this package to access the DISCOS database, you need to register an account and get a token. 
+
+```python
+from slrfield import discos_query
+result = discos_query(Shape=['Box','Pan','+'],Length=[0.5,5],Mass=[300,500],sort='Mass')
+```
+
+ A pandas dataframe and a csv-formatted file *discos_catalog.csv* will be returned. 
+
+Pick out space targets that meets specific orbital demands from the  [CELESTRAK](https://celestrak.com) database. The CELESTRAK database mainly provides information such as the orbit inclination, period, and altitude, etc. 
+
+``` python
+from slrfield import celestrak_query
+result = celestrak_query(Payload=False,Decayed=False,MeanAlt=None=[400,1000],sort='-Inclination')
+```
+
+A pandas dataframe and a csv-formatted file *celestrak_catalog.csv* will be returned. 
+
+Pick out space targets from the combination of DISCOS and CELESTRAK.
+
+```python
+from slrfield import target_query
+targets_df = target_query(Payload=False,Decayed=False,RCSAvg=[5,100],MeanAlt=[300,800])
+```
+
+A pandas dataframe and a csv-formatted file *target_catalog.csv* will be returned. 
+
+### Download TLE/3LE data
+
+Download the TLE/3LE data from [SPACE-TRACK](https://www.space-track.org); before using this package to access the TLE/3LE database, you need to register an account. 
+
+```python
+from slrfield import tle_download
+noradids = list(targets_df['NORADID'])
+#noradids = 'satno.txt'
+tle_download(noradids)
+```
+
+A  text file *satcat_3le.txt* will be created in the directory TLE.
+
+### Calculate the visible passes for target transit
+
+```python
+t_start = '2020-06-08 23:00:00' # starting date and time 
+t_end = '2020-06-11 00:00:00' # ending date and time
+timezone = 8 # timezone
+site = ['25.03 N','102.80 E','1987.05'] # station position in lat[deg], lon[deg], and height[m] above the WGS84 ellipsoid
+visible_pass(t_start,t_end,site,timezone)
+```
+
+csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as well as a set of text file xxxx.txt will be created in the directory prediction, where 'xxxx' represents the NORADID of the target.
+
 ## Change log
+
+- **0.1.3 — Jun 9,  2020**
+
+  Expanded the following functions：
+
+  - Automatically download TLE/3LE data from [SPACETRACK](https://www.space-track.org)
+  - Pick out space targets that meets specific demands from [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) and [CELESTRAK](https://celestrak.com) database by setting a series of parameters, such as mass, shape, RCS(Radar Cross Section), and orbit altitude etc.
+  - Calculate one-day prediction and multiple-day visible passes for space targets based on TLE/3LE data
 
 - **0.0.2 — Apr 21,  2020**
   - The ***slrfield*** package was released.
 
 ## Next release
 
- - Complete the help documentation
-
  - Improve the code structure to make it easier to read
-
  - Add functions to download, parse, and handle the CRD(**Consolidated Laser Ranging Data Format**) observations
+ - Add  functions to estimate the apparent magnitude of the target
 
 ## Reference
 
 - [Python package for satellite laser ranging file formats](https://github.com/dronir/SLRdata)
 - [Consolidated Laser Ranging Prediction Format Version 1.01](https://ilrs.gsfc.nasa.gov/docs/2006/cpf_1.01.pdf)
 - [sample code](https://ilrs.gsfc.nasa.gov/docs/2017/cpf_sample_code_v1.01d.tgz) on [ILRS](https://ilrs.gsfc.nasa.gov/data_and_products/formats/cpf.html)
+- [Skyfield-Elegant Astronomy for Python](https://rhodesmill.org/skyfield/)
+- [DISCOS](https://discosweb.esoc.esa.int)
+- [CELESTRAK](https://celestrak.com) 
+- [SPACE-TRACK](https://www.space-track.org)
