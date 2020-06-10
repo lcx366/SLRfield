@@ -267,7 +267,7 @@ def discos_query(COSPARID=None,NORADID=None,ObjectClass=None,Payload=None,Decaye
     new_column_reorder = ['COSPARID', 'NORADID', 'VimpelId', 'Satellite Name','ObjectClass','Mass[kg]','Shape','Height[m]','Length[m]','Depth[m]','RCSMin[m2]','RCSMax[m2]','RCSAvg[m2]']
     df = pd.DataFrame.from_dict(extract,dtype=object).rename(columns=dict(zip(old_column, new_column)), errors='raise')
     df = df.reindex(columns=new_column_reorder) 
-    df = df.reset_index()
+    df = df.reset_index(drop=True)
     if outfile: df.to_csv('discos_catalog.csv') # Save the pandas dataframe to a csv-formatted file
     return df   
 
@@ -402,7 +402,7 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
 
     # Set filter for 'OrbitalPeriod'
     if OrbitalPeriod is not None:
-        OrbitalPeriod_flag = (data['Orbital period[min]'] > OrbitalPeriod[0]) & (data['Orbital period[min]'] < OrbitalPeriod[1])
+        OrbitalPeriod_flag = (data['Orbital Period[min]'] > OrbitalPeriod[0]) & (data['Orbital Period[min]'] < OrbitalPeriod[1])
     else:
         OrbitalPeriod_flag = full_of_true   
 
@@ -445,7 +445,7 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
 
     # Eeadjust the order of the columns 
     column_reorder = ['COSPARID', 'NORADID', 'Satellite Name','Multiple Name Flag','Payload Flag','Operational Status Code','Decay Date',\
-                      'Orbital period[min]', 'Inclination[deg]','Apogee Altitude[km]','Perigee Altitude[km]','Mean Altitude[km]',\
+                      'Orbital Period[min]', 'Inclination[deg]','Apogee Altitude[km]','Perigee Altitude[km]','Mean Altitude[km]',\
                       'Launch Date','Launch Site','Radar Cross Section[m2]','Country','Orbital Status Code']
     df = df.reindex(columns=column_reorder)
             
@@ -465,7 +465,7 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
         elif sort.__contains__('DecayDate'):
             df = df.sort_values(by=['Decay Date'],ascending=ascending_flag)   
         elif sort.__contains__('OrbitalPeriod'):
-            df = df.sort_values(by=['Orbital period[min]'],ascending=ascending_flag)    
+            df = df.sort_values(by=['Orbital Period[min]'],ascending=ascending_flag)    
         elif sort.__contains__('Inclination'):
             df = df.sort_values(by=['Inclination[deg]'],ascending=ascending_flag) 
         elif sort.__contains__('ApoAlt'):
@@ -484,7 +484,7 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
             df = df.sort_values(by=['Country'],ascending=ascending_flag)
         else:
             raise Exception("Avaliable options include 'COSPARID', NORADID', 'DecayDate', 'OrbitalPeriod', 'Inclination', 'ApoAlt', 'PerAlt', 'MeanAlt', 'LaunchDate', 'LaunchSite', 'RCS', and 'Country'. Also, a negative sign '-' can be added ahead to the option to sort in descending order.")
-    df = df.reset_index()
+    df = df.reset_index(drop=True)
     if outfile: df.to_csv('celestrak_catalog.csv') # Save the pandas dataframe to a csv-formatted file
     return df
 
@@ -550,7 +550,7 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
     df = df.drop(['Radar Cross Section[m2]','VimpelId'],axis=1)
     column_reorder = ['COSPARID', 'NORADID', 'Satellite Name','Multiple Name Flag','ObjectClass','Payload Flag','Operational Status Code','Mass[kg]','Shape',\
                       'Length[m]', 'Height[m]','Depth[m]','RCSMin[m2]', 'RCSMax[m2]', 'RCSAvg[m2]',\
-                      'Orbital period[min]', 'Inclination[deg]','Apogee Altitude[km]', 'Perigee Altitude[km]','Mean Altitude[km]',\
+                      'Orbital Period[min]', 'Inclination[deg]','Apogee Altitude[km]', 'Perigee Altitude[km]','Mean Altitude[km]',\
                       'Launch Date', 'Decay Date','Launch Site','Country','Orbital Status Code']
     df = df.reindex(columns=column_reorder)  
          
@@ -588,7 +588,7 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
         elif sort.__contains__('DecayDate'):
             df = df.sort_values(by=['Decay Date'],ascending=ascending_flag)   
         elif sort.__contains__('OrbitalPeriod'):
-            df = df.sort_values(by=['Orbital period[min]'],ascending=ascending_flag)    
+            df = df.sort_values(by=['Orbital Period[min]'],ascending=ascending_flag)    
         elif sort.__contains__('Inclination'):
             df = df.sort_values(by=['Inclination[deg]'],ascending=ascending_flag) 
         elif sort.__contains__('ApoAlt'):
@@ -605,6 +605,6 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
             df = df.sort_values(by=['Country'],ascending=ascending_flag)
         else:
             raise Exception("Avaliable options include 'COSPARID', NORADID', 'DecayDate', 'OrbitalPeriod', 'Inclination', 'ApoAlt', 'PerAlt', 'MeanAlt', 'LaunchDate', 'LaunchSite', 'RCS', and 'Country'. Also, a negative sign '-' can be added to the option to sort in descending order.")
-    df = df.reset_index()
+    df = df.reset_index(drop=True)
     if outfile: df.to_csv('target_catalog.csv') # Save the pandas dataframe to a csv-formatted file
     return df                
