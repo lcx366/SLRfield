@@ -129,7 +129,7 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     load_eph = Loader(direc_eph)
     load_time = Loader(direc_time)
 
-    print('\nDownloading JPL ephemeris and time files',end=' ... \n')
+    print('\nDownloading JPL ephemeris DE430 and timescale files',end=' ... \n')
 
     # URL of JPL DE430
     url = 'http://www.shareresearch.me/wp-content/uploads/2020/05/de430.bsp' 
@@ -146,7 +146,7 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
             print('\nDownload failed using urlretrieve. Try to download using wget tool.')
             download(url, de430)  
 
-    print('Downloading the time files',end=' ... \n')
+    print('Downloading timescale files',end=' ... \n')
     ts = load_time.timescale()
     planets = load_eph('de430.bsp')
     
@@ -195,6 +195,8 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     outfile0 = open(dir_prediction+filename0,'w')
     header = ['Start Time[UTC+' + str(timezone) +']','End Time[UTC+' + str(timezone) +']','NORADID', 'During[seconds]']
     outfile0.write('{},{},{},{}\n'.format(header[0],header[1],header[2],header[3]))
+    
+    print('Generate one-day prediction for targets:')
 
     for sat in sats:
         visible_flag = False
@@ -249,7 +251,7 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
         else:
             outfile0.write('\n')
         outfile.close() 
-        print('Generate one-day prediction for target {:s}'.format(str(noradid)))
+        print(noradid)
     outfile0.close() 
     print('Generate multiple-day visible passes for all targets.')
     

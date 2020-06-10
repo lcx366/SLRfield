@@ -290,7 +290,7 @@ def download_satcat():
     if not path.exists(direc): makedirs(direc)
 
     if not path.exists(scfile):
-        print('Downloading the latest satellite catalog from celestrak',end=' ... ')
+        print('Downloading the latest satellite catalog from CELESTRAK',end=' ... ')
         urlretrieve(url, scfile)
         print('Finished')
 
