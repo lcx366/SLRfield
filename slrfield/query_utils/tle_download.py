@@ -24,12 +24,12 @@ def tle_download(noradids):
     tlefile -> [str] Path of TLE/3LE file
     '''
     # noradids as a file
-    if '.' in noradids:
-        noradids = list(set(np.loadtxt(noradids,dtype=np.str)))
-    elif type(noradids) is int:
-        noradids = str(noradids)
+    if type(noradids) is int:
+        noradids = str(noradids)  
     elif type(noradids) is list:
         if type(noradids[0]) is int: noradids = [str(i) for i in noradids]    
+    elif '.' in noradids:
+        noradids = list(set(np.loadtxt(noradids,dtype=np.str)))
     else:
         pass        
     
