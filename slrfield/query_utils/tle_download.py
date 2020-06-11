@@ -73,6 +73,7 @@ def tle_download(noradids):
         file_3le.write(line+'\n')
     file_3le.close()  
     print('Complete')
+    if type(noradids) is not list: noradids = [noradids]
     missing_ids = list(set(noradids)-set(valid_ids))
     if missing_ids: print('Note: TLE data for these targets are not avaliable: ',missing_ids) 
 
