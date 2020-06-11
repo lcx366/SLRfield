@@ -264,5 +264,8 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     for date in dates:
         date_flag = VisiblePasses[header[0]].str.contains(date,na=False)
         temp.append(VisiblePasses[date_flag].sort_values(by=[header[0]]).append(pd.Series(dtype=object), ignore_index=True)) 
-    pd.concat(temp).to_csv(dir_prediction+'VisiblePasses_bydate.csv',index=False,mode='w')
+    if not temp:
+        print('No visible passes are found!')
+    else:    
+        pd.concat(temp).to_csv(dir_prediction+'VisiblePasses_bydate.csv',index=False,mode='w')
     print('Over!')    
