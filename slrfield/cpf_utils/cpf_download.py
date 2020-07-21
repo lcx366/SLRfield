@@ -1,7 +1,7 @@
 from os import system,path,remove,makedirs
 from ftplib import FTP
 from astropy.time import Time
-import time as pytime
+from time import sleep
 
 def download_bycurrent(source,satnames):
     '''
@@ -221,5 +221,5 @@ def try_download(ftp,dir_cpf_from,dir_cpf_to,cpf_file):
             local_file.close()
             remove(dir_cpf_to + cpf_file)
             if idownload == 2: raise Exception('Server did not respond, file download failed') 
-            pytime.sleep(20)    
+            sleep(20)    
                             
