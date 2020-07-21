@@ -2,6 +2,8 @@ from os import system,path,remove,makedirs
 from ftplib import FTP
 from astropy.time import Time
 from time import sleep
+from tqdm import tqdm
+from colorama import Fore
 
 def download_bycurrent(source,satnames):
     '''
@@ -185,17 +187,17 @@ def cpf_download(satnames = None,date = None,source = 'CDDIS'):
         ftp.login()  
         ftp.cwd(dir_cpf_from) 
         for cpf_file in cpf_files:
-            try_download(ftp,dir_cpf_from,dir_cpf_to,cpf_file)
+            try_download(ftp,dir_cpf_to,cpf_file)
             dir_cpf_files.append(dir_cpf_to+cpf_file)
                 
     else:    
         server,dirs_cpf_from, dir_cpf_to,cpf_files = download_bydate(source,date,satnames)    
         ftp = FTP(server)    
         ftp.login()  
-    
-        for dir_cpf_from,cpf_file in zip(dirs_cpf_from,cpf_files):
-            ftp.cwd(dir_cpf_from) 
-            try_download(ftp,dir_cpf_from,dir_cpf_to,cpf_file)
+        ftp.cwd(dir_cpf_from)
+
+        for cpf_file in cpf_files:
+            try_download(ftp,dir_cpf_to,cpf_file)
             dir_cpf_files.append(dir_cpf_to+cpf_file)
                            
     ftp.quit()  
@@ -203,19 +205,24 @@ def cpf_download(satnames = None,date = None,source = 'CDDIS'):
 
     return dir_cpf_files
 
-def try_download(ftp,dir_cpf_from,dir_cpf_to,cpf_file):
+def try_download(ftp,dir_cpf_to,cpf_file):
     '''
     Download the CPF ephemeris files into the user's local directory from remote server.
     '''
-    print('Downloading ... ',cpf_file,end=' ... ')
     # If the download fails, try to download 3 times
     for idownload in range(3):
         try:
             with open(dir_cpf_to + cpf_file, 'wb') as local_file:
-                res = ftp.retrbinary('RETR ' + dir_cpf_from + cpf_file, local_file.write) # RETR is an FTP command
-                print(res)
+                total_size = ftp.size(cpf_file)
+                pbar = tqdm(desc = 'Downloading {:s}'.format(cpf_file),total=total_size,unit='B',unit_scale=True)
+                def progressbar(data):
+                    pbar.bar_format = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
+                    pbar.update(len(data))
+                    local_file.write(data)
+                res = ftp.retrbinary('RETR ' + cpf_file, progressbar) # RETR is an FTP command
+                pbar.close()
                 local_file.close()   
-                break
+            break
                    
         except:
             local_file.close()

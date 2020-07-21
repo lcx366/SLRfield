@@ -5,6 +5,8 @@ from pathlib import Path
 import requests
 from urllib.request import urlretrieve
 from datetime import datetime,timedelta
+from colorama import Fore
+from ..slrclasses.tqdmupto import TqdmUpTo
 
 def discos_buildin_filter(params,expr):
     '''
@@ -288,19 +290,22 @@ def download_satcat():
     url = 'https://celestrak.com/pub/satcat.txt'
 
     if not path.exists(direc): makedirs(direc)
-
+    
+    bar_format = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
     if not path.exists(scfile):
-        print('Downloading the latest satellite catalog from CELESTRAK',end=' ... ')
-        urlretrieve(url, scfile)
-        print('Finished')
+        desc = 'Downloading the latest satellite catalog from CELESTRAK'
+        with TqdmUpTo(unit='B', unit_scale=True, desc=desc,bar_format = bar_format) as t:  # all optional kwargs
+            urlretrieve(url, scfile, reporthook=t.update_to)
+            t.total = t.n
 
     else:
         modified_time = datetime.fromtimestamp(path.getmtime(scfile))
         if datetime.now() > modified_time + timedelta(days=7):
             remove(scfile)
-            print('Updating the satellite catalog from celestrak',end=' ... ')
-            urlretrieve(url, scfile)    
-            print('Finished')
+            desc = 'Updating the satellite catalog from celestrak'
+            with TqdmUpTo(unit='B', unit_scale=True, desc=desc,bar_format = bar_format) as t:  # all optional kwargs
+                urlretrieve(url, scfile, reporthook=t.update_to)
+                t.total = t.n   
         else:
             print('The satellite catalog in {:s} is already the latest.'.format(direc))    
     return scfile
@@ -535,7 +540,7 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
     df_celestrak = celestrak_query(COSPARID,NORADID,Payload,Decayed,DecayDate,OrbitalPeriod,Inclination,ApoAlt,PerAlt,MeanAlt,Country,outfile=False).drop('Satellite Name',axis=1)
     
     # Query space targets from the DISCOS database
-    print('Go through the DISCOS database:')    
+    print('\nGo through the DISCOS database ... ')    
     df_discos = discos_query(COSPARID,NORADID,ObjectClass,Payload,Decayed,DecayDate,Mass,Shape,Length,Height,Depth,RCSMin,RCSMax,RCSAvg,outfile=False).dropna(subset=['NORADID'])
     
     # Take the intersection of CELESTRAK and DISCOS

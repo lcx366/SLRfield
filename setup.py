@@ -14,7 +14,7 @@ setup(
     classifiers=[
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.7,3.8',
         'License :: OSI Approved :: MIT License',
         ],
     packages=setuptools.find_packages(),
@@ -25,7 +25,9 @@ setup(
         'numpy',
         'pandas',
         'spacetrack',
-        'skyfield>=1.21'
-        'astropy>=4.0.1'
+        'skyfield>=1.21',
+        'astropy>=4.0.1',
+        'tqdm',
+        'colorama'
         ],
 )
