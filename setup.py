@@ -14,7 +14,7 @@ setup(
     classifiers=[
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
-        'Programming Language :: Python :: 3.7,3.8',
+        'Programming Language :: Python :: 3.8',
         'License :: OSI Approved :: MIT License',
         ],
     packages=setuptools.find_packages(),
