@@ -294,7 +294,7 @@ def download_satcat():
     bar_format = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
     if not path.exists(scfile):
         desc = 'Downloading the latest satellite catalog from CELESTRAK'
-        with TqdmUpTo(unit='B', unit_scale=True, desc=desc,bar_format = bar_format) as t:  
+        with TqdmUpTo(unit='B', unit_scale=True, desc=desc,bar_format = bar_format,position=0) as t:  
             urlretrieve(url, scfile, reporthook=t.update_to)
             t.total = t.n
 
@@ -303,7 +303,7 @@ def download_satcat():
         if datetime.now() > modified_time + timedelta(days=7):
             remove(scfile)
             desc = 'Updating the satellite catalog from CELESTRAK'
-            with TqdmUpTo(unit='B', unit_scale=True, desc=desc,bar_format = bar_format) as t:  
+            with TqdmUpTo(unit='B', unit_scale=True, desc=desc,bar_format = bar_format,position=0) as t:  
                 urlretrieve(url, scfile, reporthook=t.update_to)
                 t.total = t.n   
         else:

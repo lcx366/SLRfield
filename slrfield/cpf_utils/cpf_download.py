@@ -214,18 +214,16 @@ def try_download(ftp,dir_cpf_to,cpf_file):
         try:
             with open(dir_cpf_to + cpf_file, 'wb') as local_file:
                 total_size = ftp.size(cpf_file)
-                pbar = tqdm(desc = 'Downloading {:s}'.format(cpf_file),total=total_size,unit='B',unit_scale=True)
+                pbar = tqdm(desc = 'Downloading {:s}'.format(cpf_file),total=total_size,unit='B',unit_scale=True,position=0)
                 def progressbar(data):
                     pbar.bar_format = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
                     pbar.update(len(data))
                     local_file.write(data)
                 res = ftp.retrbinary('RETR ' + cpf_file, progressbar) # RETR is an FTP command
                 pbar.close()
-                local_file.close()   
             break
                    
         except:
-            local_file.close()
             remove(dir_cpf_to + cpf_file)
             if idownload == 2: raise Exception('Server did not respond, file download failed') 
             sleep(20)    
