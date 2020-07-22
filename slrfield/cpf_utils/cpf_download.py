@@ -41,7 +41,7 @@ def download_bycurrent(source,satnames):
     else:    
         raise Exception("Currently, for CPF prediction centers, only 'CDDIS' and 'EDC' are available.")    
     
-    ftp = FTP(server)
+    ftp = FTP(server,timeout=100)
     ftp.login()
     ftp.cwd(dir_cpf_from)
     cpf_files_list = ftp.nlst('-t','*cpf*') # list files containing 'cpf' from newest to oldest   
@@ -109,7 +109,7 @@ def download_bydate(source,date,satnames):
     else:    
         raise Exception("Currently, CPF predictions only from 'CDDIS' and 'EDC' are available.")     
         
-    ftp = FTP(server)    
+    ftp = FTP(server,timeout=100)    
     ftp.login()
     
     for satname in reduplicates:
@@ -192,7 +192,7 @@ def cpf_download(satnames = None,date = None,source = 'CDDIS'):
                 
     else:    
         server,dirs_cpf_from, dir_cpf_to,cpf_files = download_bydate(source,date,satnames)    
-        ftp = FTP(server)    
+        ftp = FTP(server,timeout=100)    
         ftp.login()  
         ftp.cwd(dir_cpf_from)
 
