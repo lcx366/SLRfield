@@ -1,9 +1,8 @@
 from os import system,path,remove,makedirs
 from ftplib import FTP
 from astropy.time import Time
-from time import sleep
-from tqdm import tqdm
-from colorama import Fore
+
+from ..utils.try_download import tqdm_ftp
 
 def download_bycurrent(source,satnames):
     '''
@@ -41,7 +40,7 @@ def download_bycurrent(source,satnames):
     else:    
         raise Exception("Currently, for CPF prediction centers, only 'CDDIS' and 'EDC' are available.")    
     
-    ftp = FTP(server,timeout=100)
+    ftp = FTP(server,timeout=200)
     ftp.login()
     ftp.cwd(dir_cpf_from)
     cpf_files_list = ftp.nlst('-t','*cpf*') # list files containing 'cpf' from newest to oldest   
@@ -109,7 +108,7 @@ def download_bydate(source,date,satnames):
     else:    
         raise Exception("Currently, CPF predictions only from 'CDDIS' and 'EDC' are available.")     
         
-    ftp = FTP(server,timeout=100)    
+    ftp = FTP(server,timeout=200)    
     ftp.login()
     
     for satname in reduplicates:
@@ -183,48 +182,24 @@ def cpf_download(satnames = None,date = None,source = 'CDDIS'):
     
     if date is None:
         server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent(source,satnames)  
-        ftp = FTP(server)    
+        ftp = FTP(server,timeout=200)    
         ftp.login()  
         ftp.cwd(dir_cpf_from) 
         for cpf_file in cpf_files:
-            try_download(ftp,dir_cpf_to,cpf_file)
+            tqdm_ftp(ftp,dir_cpf_to,cpf_file)
             dir_cpf_files.append(dir_cpf_to+cpf_file)
                 
     else:    
-        server,dirs_cpf_from, dir_cpf_to,cpf_files = download_bydate(source,date,satnames)    
-        ftp = FTP(server,timeout=100)    
+        server,dirs_cpf_from, dir_cpf_to,cpf_files = download_bydate(source,date,satnames)   
+        ftp = FTP(server,timeout=200)    
         ftp.login()  
-        ftp.cwd(dir_cpf_from)
 
-        for cpf_file in cpf_files:
-            try_download(ftp,dir_cpf_to,cpf_file)
+        for dir_cpf_from,cpf_file in zip(dirs_cpf_from,cpf_files):
+            ftp.cwd(dir_cpf_from)
+            tqdm_ftp(ftp,dir_cpf_to,cpf_file)
             dir_cpf_files.append(dir_cpf_to+cpf_file)
                            
     ftp.quit()  
     ftp.close()
 
     return dir_cpf_files
-
-def try_download(ftp,dir_cpf_to,cpf_file):
-    '''
-    Download the CPF ephemeris files into the user's local directory from remote server.
-    '''
-    # If the download fails, try to download 3 times
-    for idownload in range(3):
-        try:
-            with open(dir_cpf_to + cpf_file, 'wb') as local_file:
-                total_size = ftp.size(cpf_file)
-                pbar = tqdm(desc = 'Downloading {:s}'.format(cpf_file),total=total_size,unit='B',unit_scale=True,position=0)
-                def progressbar(data):
-                    pbar.bar_format = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
-                    pbar.update(len(data))
-                    local_file.write(data)
-                res = ftp.retrbinary('RETR ' + cpf_file, progressbar) # RETR is an FTP command
-                pbar.close()
-            break
-                   
-        except:
-            remove(dir_cpf_to + cpf_file)
-            if idownload == 2: raise Exception('Server did not respond, file download failed') 
-            sleep(20)    
-                            

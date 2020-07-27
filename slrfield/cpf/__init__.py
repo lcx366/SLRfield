@@ -1,9 +1,9 @@
 '''
-slrfield cpf_utils subpackage
+slrfield cpf subpackage
 
 This subpackage defines the following functions:
 
-# ======================== cpf_download ====================== #
+# cpf_download.py 
 
 download_bycurrent - Download the latest CPF ephemeris files at the current moment
 
@@ -15,13 +15,13 @@ otherwise, download the latest cpf ephemeris files before the given date and tim
 
 try_download - Connect to the server and try to download the cpf ephemeris files
 
-# ========================== cpf_read ======================== #
+# cpf_read.py
 
 read_cpf - Parse a single CPF ephemeris file
 
 read_cpfs - Parse a set of CPF ephemeris files
 
-# ====================== cpf_interpolate ===================== #
+# cpf_interpolate.py
 
 cpf_interpolate - Interpolate the CPF ephemeris and make the prediction
 

@@ -3,10 +3,9 @@ import pandas as pd
 from os import path,makedirs,remove
 from pathlib import Path
 import requests
-from urllib.request import urlretrieve
 from datetime import datetime,timedelta
-from colorama import Fore
-from ..slrclasses.tqdmupto import TqdmUpTo
+
+from ..utils.try_download import tqdm_request
 
 def discos_buildin_filter(params,expr):
     '''
@@ -290,22 +289,15 @@ def download_satcat():
     url = 'https://celestrak.com/pub/satcat.txt'
 
     if not path.exists(direc): makedirs(direc)
-    
-    bar_format = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
     if not path.exists(scfile):
         desc = 'Downloading the latest satellite catalog from CELESTRAK'
-        with TqdmUpTo(unit='B', unit_scale=True, desc=desc,bar_format = bar_format,position=0) as t:  
-            urlretrieve(url, scfile, reporthook=t.update_to)
-            t.total = t.n
-
+        tqdm_request(url,direc,'satcat.txt',desc)
     else:
         modified_time = datetime.fromtimestamp(path.getmtime(scfile))
         if datetime.now() > modified_time + timedelta(days=7):
             remove(scfile)
             desc = 'Updating the satellite catalog from CELESTRAK'
-            with TqdmUpTo(unit='B', unit_scale=True, desc=desc,bar_format = bar_format,position=0) as t:  
-                urlretrieve(url, scfile, reporthook=t.update_to)
-                t.total = t.n   
+            tqdm_request(url,direc,'satcat.txt',desc)  
         else:
             print('The satellite catalog in {:s} is already the latest.'.format(direc))    
     return scfile

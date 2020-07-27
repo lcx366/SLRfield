@@ -3,7 +3,7 @@ slrfield slrclasses subpackage
 
 This subpackage defines some classes that facilitate the processing of the SLR(Satellite Laser Ranging) data.
 
-#========================== cpfpred ========================#
+# cpfpred.py
 
 Class structure:
 

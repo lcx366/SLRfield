@@ -1,8 +1,6 @@
 from glob import glob
 from pathlib import Path
 from os import path,mkdir,remove
-from urllib.request import urlretrieve,ContentTooShortError
-from wget import download
 
 import numpy as np
 import pandas as pd
@@ -10,7 +8,8 @@ import pandas as pd
 from skyfield.api import Topos,Loader,load
 from astropy.time import TimeDelta,Time
 from astropy import units as u
-from astropy.constants import R_earth,R_sun
+
+from ..utils.try_download import tqdm_request
 
 def t_list(ts,t_start,t_end,t_step=60):
     '''
@@ -138,13 +137,8 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     url = 'https://repos.cosmos.esa.int/socci/projects/SPICE_KERNELS/repos/juice/browse/kernels/spk/de430.bsp'
     '''
     if not path.exists(de430):
-        print('Downloading de430.bsp',end=' ... ')
-        try:
-            urlretrieve(url, de430)
-            print('Finished')
-        except ContentTooShortError:
-            print('\nDownload failed using urlretrieve. Try to download using wget tool.')
-            download(url, de430)  
+        desc = 'Downloading {:s}'.format('de430.bsp')
+        tqdm_request(url,direc_eph,'de430.bsp',desc)
 
     print('Downloading timescale files',end=' ... \n')
     ts = load_time.timescale()

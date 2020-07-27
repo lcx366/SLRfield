@@ -1,6 +1,6 @@
 from os import system,path,makedirs
 
-from ..cpf_utils.cpf_interpolate import cpf_interpolate,itrs2horizon
+from ..cpf.cpf_interpolate import cpf_interpolate,itrs2horizon
 
 class CPFdata(object):
     '''

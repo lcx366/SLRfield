@@ -237,6 +237,10 @@ csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as 
 
 ## Change log
 
+- **0.1.9 — Jul 26,  2020**
+
+  Added progress bar for downloading data
+
 - **0.1.5 — Jun 9,  2020**
 
   Expanded the following functions：
@@ -246,6 +250,7 @@ csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as 
   - Calculate one-day prediction and multiple-day visible passes for space targets based on TLE/3LE data
 
 - **0.0.2 — Apr 21,  2020**
+  
   - The ***slrfield*** package was released.
 
 ## Next release

@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='slrfield',
-    version='0.1.8',
+    version='0.1.9',
     long_description_content_type='text/markdown',
     description='A package to handle the SLR(Satellite Laser Ranging) data',
     long_description=open('README.md', 'rb').read().decode('utf-8'),
@@ -20,7 +20,6 @@ setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=[
-        'wget',
         'scipy',
         'numpy',
         'pandas',
