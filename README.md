@@ -211,7 +211,7 @@ csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as 
 
 - **0.1.10 — Sep 28,  2020**
 
-  The CDDIS will discontinue anonymous ftp access to its archive in October 2020, therefore, this package implement the transition from ftp to EARTHDATA for downloading CPF files.
+  The CDDIS will discontinue anonymous ftp access to its archive in October 2020, therefore, this package implements the transition from ftp to EARTHDATA for downloading CPF files.
 
 - **0.1.9 — Jul 26,  2020**
 
