@@ -29,17 +29,6 @@ In this package, for prediction data centers, only **CDDIS**(Crustal Dynamics Da
 ```python
 >>> from slrfield import cpf_download
 >>> cpf_files_all = cpf_download()
-Downloading ...  swarmb_cpf_200420_6111.esa ... 226 Transfer complete.
-Downloading ...  swarma_cpf_200420_6111.esa ... 226 Transfer complete.
-...
-Downloading ...  compassi5_cpf_200412_6031.sha ... 226 Transfer complete.
-Downloading ...  compassi3_cpf_200412_6031.sha ... 226 Transfer complete.
->>> print(cpf_files_all)
-['CPF/CDDIS/2020-04-20/swarmb_cpf_200420_6111.esa',
- 'CPF/CDDIS/2020-04-20/swarma_cpf_200420_6111.esa',
- ...,
- 'CPF/CDDIS/2020-04-20/compassi5_cpf_200412_6031.sha',
- 'CPF/CDDIS/2020-04-20/compassi3_cpf_200412_6031.sha']
 >>> # From EDC
 >>> # cpf_files_all = cpf_download(source = 'EDC')
 ```
@@ -50,11 +39,6 @@ From ***CDDIS*** by default
 ```python
 >>> sat_lists = ['ajisai','lageos1','hy2a','etalon2','jason3']
 >>> cpf_files_cddis = cpf_download(sat_lists) 
-Downloading ...  etalon2_cpf_200420_6111.hts ... 226 Transfer complete.
-Downloading ...  lageos1_cpf_200420_6111.hts ... 226 Transfer complete.
-Downloading ...  ajisai_cpf_200420_6111.hts ... 226 Transfer complete.
-Downloading ...  jason3_cpf_200420_6111.hts ... 226 Transfer complete.
-Downloading ...  hy2a_cpf_200420_6111.sha ... 226 Transfer complete.
 ```
 
 From ***EDC***
@@ -62,11 +46,6 @@ From ***EDC***
 ```python
 >>> sat_lists = ['ajisai','lageos1','hy2a','etalon2','jason3']
 >>> cpf_files_edc = cpf_download(sat_lists,source = 'EDC') 
-Downloading ...  ajisai_cpf_200420_6111.hts ... 226 Transfer complete.
-Downloading ...  etalon2_cpf_200420_6111.hts ... 226 Transfer complete.
-Downloading ...  jason3_cpf_200420_6111.hts ... 226 Transfer complete.
-Downloading ...  lageos1_cpf_200420_6111.hts ... 226 Transfer complete.
-Downloading ...  hy2a_cpf_200420_6111.sha ... 226 Transfer complete.
 ```
 
 ### Download the latest CPF ephemeris files before a specific date and time
@@ -77,9 +56,6 @@ From ***CDDIS*** by default
 >>> sat_name = 'lageos1'
 >>> date = '2007-06-01 11:30:00'
 >>> cpf_file_cddis = cpf_download(sat_name,date)
-Downloading ...  lageos1_cpf_070601_6521.sgf ... 226 Transfer complete.
->>> print(cpf_file_cddis)
-['CPF/CDDIS/2007-06-01/lageos1_cpf_070601_6521.sgf']
 ```
 
 From ***EDC***
@@ -88,10 +64,6 @@ From ***EDC***
 >>> sat_lists = ['starlette','lageos1']
 >>> date = '2017-01-01 11:30:00'
 >>> cpf_files_edc = cpf_download(sat_lists,date,'EDC')
-Downloading ...  starlette_cpf_170101_8662.hts ... 226 Transfer complete.
-Downloading ...  lageos1_cpf_170101_8662.hts ... 226 Transfer complete.
->>> print(cpf_files_edc)
-['CPF/EDC/2017-01-01/starlette_cpf_170101_8662.hts', 'CPF/EDC/2017-01-01/lageos1_cpf_170101_8662.hts']
 ```
 
 ### Parse the CPF ephemeris files and read the data
@@ -236,6 +208,10 @@ visible_pass(t_start,t_end,site,timezone)
 csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as well as a set of text file xxxx.txt will be created in the directory prediction, where 'xxxx' represents the NORADID of the target.
 
 ## Change log
+
+- **0.1.10 — Sep 28,  2020**
+
+  The CDDIS will discontinue anonymous ftp access to its archive in October 2020, therefore, this package implement the transition from ftp to EARTHDATA for downloading CPF files.
 
 - **0.1.9 — Jul 26,  2020**
 

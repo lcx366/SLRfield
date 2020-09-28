@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='slrfield',
-    version='0.1.9',
+    version='0.1.10',
     long_description_content_type='text/markdown',
     description='A package to handle the SLR(Satellite Laser Ranging) data',
     long_description=open('README.md', 'rb').read().decode('utf-8'),
@@ -27,6 +27,7 @@ setup(
         'skyfield>=1.21',
         'astropy>=4.0.1',
         'tqdm',
-        'colorama'
+        'colorama',
+        'beautifulsoup4'
         ],
 )

@@ -1,3 +1,4 @@
+from os import remove
 import requests
 from tqdm import tqdm
 from colorama import Fore
@@ -29,7 +30,7 @@ def tqdm_ftp(ftp,dir_cpf_to,cpf_file):
             local_file.close()   
 
 
-def tqdm_request(url,dir_to,file,desc):
+def tqdm_request(url,dir_cpf_to,cpf_file,desc):
     '''
     Try to download files from remote server by request.
     '''
@@ -37,11 +38,10 @@ def tqdm_request(url,dir_to,file,desc):
     bar_format = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
     for idownload in range(5):
         try:
-            local_file = open(dir_to + file, 'ab')
+            local_file = open(dir_cpf_to + cpf_file, 'ab')
             pos = local_file.tell()
-            resume_header = {'Range': f'bytes={pos}-'}
-            res = requests.get(url,stream=True,timeout=200,headers=resume_header)
-            total_size = int(res.headers.get('content-length', 0))
+            res = requests.get(url,stream=True,timeout=200)
+            total_size = int(res.headers.get('content-length'))
             pbar = tqdm(desc = desc,total=total_size,unit='B',unit_scale=True,bar_format = bar_format,position=0,initial=pos)
             for chunk in res.iter_content(block_size):
                 local_file.write(chunk)  
@@ -52,7 +52,7 @@ def tqdm_request(url,dir_to,file,desc):
         except: 
             sleep(2)
             if idownload == 4:
-                remove(dir_to + file)
+                remove(dir_cpf_to + cpf_file)
                 print('No response, skip this file.') 
         finally:    
-            local_file.close()                       
+            local_file.close()        
