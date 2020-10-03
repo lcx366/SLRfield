@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='slrfield',
-    version='0.1.10',
+    version='0.1.11',
     long_description_content_type='text/markdown',
     description='A package to handle the SLR(Satellite Laser Ranging) data',
     long_description=open('README.md', 'rb').read().decode('utf-8'),

@@ -26,44 +26,37 @@ In this package, for prediction data centers, only **CDDIS**(Crustal Dynamics Da
 
 #### Download all available targets
 
+The data storage directory(such as CPF/CDDIS/2020-10-02) will be automatically created or ***emptied***(if exist) by default ahead of requesting and downloading CPF files .
+
 ```python
 >>> from slrfield import cpf_download
->>> cpf_files_all = cpf_download()
->>> # From EDC
->>> # cpf_files_all = cpf_download(source = 'EDC')
+>>> cpf_files_all = cpf_download() # From CDDIS by default
+>>> # cpf_files_all = cpf_download(source = 'EDC') # From EDC
 ```
+
+By setting `append = True`, the data storage directory will  ***not*** be ***emptied***(if exist)  ahead of requesting and downloading CPF files .
+
+```python
+>>> cpf_files_append = cpf_download(['beaconc','lageos1'],append=True)
+```
+
 #### Download a set of specified targets
 
-From ***CDDIS*** by default
-
 ```python
 >>> sat_lists = ['ajisai','lageos1','hy2a','etalon2','jason3']
->>> cpf_files_cddis = cpf_download(sat_lists) 
-```
-
-From ***EDC***
-
-```python
->>> sat_lists = ['ajisai','lageos1','hy2a','etalon2','jason3']
->>> cpf_files_edc = cpf_download(sat_lists,source = 'EDC') 
+>>> cpf_files_cddis = cpf_download(sat_lists) # From CDDIS
+>>> cpf_files_edc = cpf_download(sat_lists,source = 'EDC') # From EDC
 ```
 
 ### Download the latest CPF ephemeris files before a specific date and time
 
-From ***CDDIS*** by default
-
 ```python
 >>> sat_name = 'lageos1'
 >>> date = '2007-06-01 11:30:00'
->>> cpf_file_cddis = cpf_download(sat_name,date)
-```
-
-From ***EDC***
-
-```python
+>>> cpf_file_cddis = cpf_download(sat_name,date) # From CDDIS
 >>> sat_lists = ['starlette','lageos1']
 >>> date = '2017-01-01 11:30:00'
->>> cpf_files_edc = cpf_download(sat_lists,date,'EDC')
+>>> cpf_files_edc = cpf_download(sat_lists,date,'EDC') # From EDC
 ```
 
 ### Parse the CPF ephemeris files and read the data
@@ -209,7 +202,7 @@ csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as 
 
 ## Change log
 
-- **0.1.10 — Sep 28,  2020**
+- **0.1.11 — Oct 03,  2020**
 
   The CDDIS will discontinue anonymous ftp access to its archive in October 2020, therefore, this package implements the transition from ftp to EARTHDATA for downloading CPF files.
 
