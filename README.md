@@ -1,22 +1,25 @@
 # Welcome to the SLRfield package
 
+[![PyPI version shields.io](https://img.shields.io/pypi/v/slrfield.svg)](https://pypi.python.org/pypi/pyatmos/) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/slrfield.svg)](https://pypi.python.org/pypi/pyatmos/) [![PyPI status](https://img.shields.io/pypi/status/pyatmos.svg)](https://pypi.python.org/pypi/slrfield/) [![GitHub contributors](https://img.shields.io/github/contributors/lcx366/ATMOS.svg)](https://GitHub.com/lcx366/SLRfield/graphs/contributors/) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/lcx366/SLRfield/graphs/commit-activity) [![GitHub license](https://img.shields.io/github/license/lcx366/ATMOS.svg)](https://github.com/lcx366/SLRfield/blob/master/LICENSE) [![Documentation Status](https://readthedocs.org/projects/pystmos/badge/?version=latest)](http://slrfield.readthedocs.io/?badge=latest) [![Build Status](https://travis-ci.org/lcx366/ATMOS.svg?branch=master)](https://travis-ci.org/lcx366/SLRfield)
+
 This package is an archive of scientific routines for data processing related to SLR(Satellite Laser Ranging). 
 Currently, operations on SLR data include:
 
-1. Automatically download the CPF(Consolidated Prediction Format) ephemeris file
-2. Parse the CPF ephemeris file
-3. Predict the azimuth, altitude, distance of the target, and the time of flight for laser pulse etc. given the coordinates of a station
-4. Automatically download TLE/3LE data from [SPACETRACK](https://www.space-track.org)
-5. Pick out space targets that meets specific demands from [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) and [CELESTRAK](https://celestrak.com) database by setting a series of parameters, such as mass, shape, RCS(Radar Cross Section), and orbit altitude etc.
-6. Calculate one-day prediction and multiple-day visible passes for space targets based on TLE/3LE data
+1. Automatically download the CPF(Consolidated Prediction Format) ephemeris file;
+2. Parse the CPF ephemeris file;
+3. Given the coordinates of a station predict the azimuth, altitude, distance of the target, and the time of flight for laser pulse etc.;
+4. Automatically download TLE/3LE data from [SPACETRACK](https://www.space-track.org);
+5. Pick out space targets that meets specific demands from [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) and [CELESTRAK](https://celestrak.com) database by setting a series of parameters, such as mass, shape, RCS(Radar Cross Section), and orbit altitude etc.;
+6. Calculate one-day prediction and multiple-day visible passes for space targets based on the TLE/3LE data;
 
 ## How to Install
 
-SLRfield can be installed with `pip install slrfield`.
+On Linux, macOS and Windows architectures, the binary wheels can be installed using pip by executing one of the following commands:
 
-## How to Upgrade
-
-SLRfield can be updated to the latest version with `pip install slrfield --upgrade`.
+```
+pip install slrfield
+pip install slrfield --upgrade # to upgrade a pre-existing installation
+```
 
 ## How to use
 
@@ -171,6 +174,8 @@ Pick out space targets from the combination of DISCOS and CELESTRAK.
 ```python
 from slrfield import target_query
 targets_df = target_query(Payload=False,Decayed=False,RCSAvg=[5,100],MeanAlt=[300,800])
+# The file 'noradids.txt' records the target's NORAD ids
+# targets_df = target_query(NORADID = 'noradids.txt')
 ```
 
 A pandas dataframe and a csv-formatted file *target_catalog.csv* will be returned. 
@@ -182,7 +187,7 @@ Download the TLE/3LE data from [SPACE-TRACK](https://www.space-track.org); befor
 ```python
 from slrfield import tle_download
 noradids = list(targets_df['NORADID'])
-#noradids = 'satno.txt'
+# noradids = 'satno.txt'
 tle_download(noradids)
 ```
 
@@ -201,6 +206,10 @@ visible_pass(t_start,t_end,site,timezone)
 csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as well as a set of text file xxxx.txt will be created in the directory prediction, where 'xxxx' represents the NORADID of the target.
 
 ## Change log
+
+- **0.1.12 — Jun 04,  2021**
+
+  Now you may inject the NORAD IDs of a large number of targets by a input file such as *noradids.txt* to  `target_query`.
 
 - **0.1.11 — Oct 03,  2020**
 
