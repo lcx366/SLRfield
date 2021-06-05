@@ -239,7 +239,7 @@ def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',append=False
     
     Outputs:
     dir_cpf_files -> [str list] list of paths for CPF ephemeris files in user's local directory
-    missing_cpf_files -> [str list or None] if None, it lists files that are not responsed from the server
+    missing_cpf_files -> [str list or None] if not None, it lists files that are not responsed from the server
 
     Note: if 'date' is provided, namely not None, then 'satnames' must also be provided.
     '''
