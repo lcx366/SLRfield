@@ -1,6 +1,6 @@
 # Welcome to the SLRfield package
 
-[![PyPI version shields.io](https://img.shields.io/pypi/v/slrfield.svg)](https://pypi.python.org/pypi/pyatmos/) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/slrfield.svg)](https://pypi.python.org/pypi/pyatmos/) [![PyPI status](https://img.shields.io/pypi/status/pyatmos.svg)](https://pypi.python.org/pypi/slrfield/) [![GitHub contributors](https://img.shields.io/github/contributors/lcx366/ATMOS.svg)](https://GitHub.com/lcx366/SLRfield/graphs/contributors/) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/lcx366/SLRfield/graphs/commit-activity) [![GitHub license](https://img.shields.io/github/license/lcx366/ATMOS.svg)](https://github.com/lcx366/SLRfield/blob/master/LICENSE) [![Documentation Status](https://readthedocs.org/projects/pystmos/badge/?version=latest)](http://slrfield.readthedocs.io/?badge=latest) [![Build Status](https://travis-ci.org/lcx366/ATMOS.svg?branch=master)](https://travis-ci.org/lcx366/SLRfield)
+[![PyPI version shields.io](https://img.shields.io/pypi/v/slrfield.svg)](https://pypi.python.org/pypi/slrfield/) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/slrfield.svg)](https://pypi.python.org/pypi/slrfield/) [![PyPI status](https://img.shields.io/pypi/status/slrfield.svg)](https://pypi.python.org/pypi/slrfield/) [![GitHub contributors](https://img.shields.io/github/contributors/lcx366/SLRfield.svg)](https://GitHub.com/lcx366/SLRfield/graphs/contributors/) [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/lcx366/SLRfield/graphs/commit-activity) [![GitHub license](https://img.shields.io/github/license/lcx366/SLRfield.svg)](https://github.com/lcx366/SLRfield/blob/master/LICENSE) [![Documentation Status](https://readthedocs.org/projects/pystmos/badge/?version=latest)](http://slrfield.readthedocs.io/?badge=latest) [![Build Status](https://travis-ci.org/lcx366/SLRfield.svg?branch=master)](https://travis-ci.org/lcx366/SLRfield)
 
 This package is an archive of scientific routines for data processing related to SLR(Satellite Laser Ranging). 
 Currently, operations on SLR data include:
@@ -209,7 +209,7 @@ csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as 
 
 - **0.1.12 — Jun 04,  2021**
 
-  Now you may inject the NORAD IDs of a large number of targets by a input file such as *noradids.txt* to  `target_query`.
+  Now you may inject the NORAD IDs of a large number of targets by an input file such as *noradids.txt* to  `target_query`.
 
 - **0.1.11 — Oct 03,  2020**
 
