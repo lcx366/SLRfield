@@ -38,9 +38,7 @@ def discos_query(COSPARID=None,NORADID=None,ObjectClass=None,Payload=None,Decaye
 
     Parameters:
     COSPARID -> [str or list of str, optional, default = None] Target IDs by the in Committee On SPAce Research; if None, this option is ignored. 
-    NORADID -> [int, str, list of int/str, optional, default = None] Target IDs by the North American Aerospace Defense Command; if None, this option is ignored.
-    Note: if the NORADID list(int-formatted) contains 2 elements, namely, in form of [noradid_i,noradid_j], then these two elements form an interval. 
-    Furthermore, if the lower boundary of the interval is the same as the upper boundary, it is equivalent to setting a single value.
+    NORADID -> [int, str, list, or filename(such as noradids.txt), optional, default = None] Target IDs by the North American Aerospace Defense Command; if None, this option is ignored.
     ObjectClass -> [str or list of str, optional, default = None] Classification of targets; avaliable options include 'Payload', 'Payload Debris', 'Payload Fragmentation Debris', 
     'Payload Mission Related Object', 'Rocket Body', 'Rocket Debris', 'Rocket Fragmentation Debris', 'Rocket Mission Related Object', 'Other Mission Related Object','Other Debris', Unknown', or any combination of them, 
     for examle, ['Rocket Body', 'Rocket Debris', 'Rocket Fragmentation Debris']; If None, this option is ignored.  
@@ -137,13 +135,16 @@ def discos_query(COSPARID=None,NORADID=None,ObjectClass=None,Payload=None,Decaye
             
     # Filter parameters for 'NORADID'        
     if NORADID is not None:
-        if type(NORADID) is int or type(NORADID) is str:
-            temp = 'eq(satno,{:s})'.format(str(NORADID))   
-        elif type(NORADID) is list: 
-            if len(NORADID) == 2 and type(NORADID[0]) is int:
-                temp = 'ge(satno,{:d})&le(satno,{:d})'.format(int(NORADID[0]),int(NORADID[1]))
-            else:   
-                temp = 'in(satno,{:s})'.format(str(tuple(NORADID))).replace(' ', '')         
+        if type(NORADID) is list:   
+            temp = 'in(satno,{:s})'.format(str(tuple(NORADID))).replace(' ', '')  
+        elif type(NORADID) is str:  
+            if '.' in NORADID: 
+                NORADID = list(np.loadtxt(NORADID,dtype = str))
+                temp = 'in(satno,{:s})'.format(str(tuple(NORADID))).replace(' ', '')  
+            else:    
+                temp = 'eq(satno,{:s})'.format(NORADID)  
+        elif type(NORADID) is int: 
+            temp = 'eq(satno,{:s})'.format(str(NORADID))           
         else:
             raise Exception('Type of NORADID should be in int, str, list of int, or list of str.') 
         params = discos_buildin_filter(params,temp)    
@@ -311,9 +312,7 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
 
     Parameters:
     COSPARID -> [str or list of str, optional, default = None] Target IDs by the in Committee On SPAce Research; if None, this option is ignored.
-    NORADID -> [int, str, list of int/str, optional, default = None] Target IDs by the North American Aerospace Defense Command; if None, this option is ignored.
-    Note: if the NORADID list(int-formatted) contains 2 elements, namely, in form of [noradid_i,noradid_j], then these two elements form an interval. 
-    Furthermore, if the lower boundary of the interval is the same as the upper boundary, it is equivalent to setting a single value.
+    NORADID -> [int, str, list, or filename(such as noradids.txt), optional, default = None] Target IDs by the North American Aerospace Defense Command; if None, this option is ignored.
     Playload -> [bool, optional, default  = None] Identify whether a target belongs to payload or not. If True, payload; if False, non-payload; if None, this option is ignored.
     Decayed ->  [bool, optional, default = None] It also called reentry; if False, targets are still in orbit by now; if True, then reentry; if None, this option is ignored.
     DecayDate -> [list of str with 2 elemnts, optional, default = None] Date of reentry; it must be in form of ['date1','date2'], such as ['2019-01-05','2020-05-30']; if None, this option is ignored.
@@ -360,13 +359,14 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
     if NORADID is not None:
         if type(NORADID) is int:
             NORADID_flag = np.in1d(data['NORADID'],NORADID,assume_unique=True)
-        elif type(NORADID) is str:   
-            NORADID_flag = np.in1d(data['NORADID'],int(NORADID),assume_unique=True)
-        elif type(NORADID) is list:
-            if len(NORADID) == 2 and type(NORADID[0]) is int:
-                NORADID_list = np.arange(int(NORADID[0]),int(NORADID[1])+1)
+        elif type(NORADID) is str: 
+            if '.' in NORADID: 
+                NORADID = np.loadtxt(NORADID,dtype = int)  
             else:
-                NORADID_list = np.array(NORADID).astype(int)       
+                NORADID = int(NORADID)
+            NORADID_flag = np.in1d(data['NORADID'],NORADID,assume_unique=True)
+        elif type(NORADID) is list:
+            NORADID_list = np.array(NORADID).astype(int)       
             NORADID_flag = np.in1d(data['NORADID'],NORADID_list,assume_unique=True)        
         else:
             raise Exception('Type of NORADID should be in int, str, list of int, or list of str.')             
@@ -494,9 +494,7 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
 
     Parameters:
     COSPARID -> [str or list of str, optional, default = None] Target IDs by the in Committee On SPAce Research; if None, this option is ignored.
-    NORADID -> [int, str, list of int/str, optional, default = None] Target IDs by the North American Aerospace Defense Command; if None, this option is ignored.
-    Note: if the NORADID list(int-formatted) contains 2 elements, namely, in form of [noradid_i,noradid_j], then these two elements form an interval. 
-    Furthermore, if the lower boundary of the interval is the same as the upper boundary, it is equivalent to setting a single value.
+    NORADID -> [int, str, list, or filename(such as noradids.txt), optional, default = None] Target IDs by the North American Aerospace Defense Command; if None, this option is ignored.
     Payload -> [bool, optional, fafault = None] Identify whether a target belongs to payload or not. If True, then targets belong to payload; if False, then non-payload; if None, then this option is ignored.
     ObjectClass -> [str or list of str, optional, default = None] Classification of targets; avaliable options include 'Payload', 'Payload Debris', 'Payload Fragmentation Debris', 
     'Payload Mission Related Object', 'Rocket Body', 'Rocket Debris', 'Rocket Fragmentation Debris', 'Rocket Mission Related Object', 'Other Mission Related Object','Other Debris', Unknown', or any combination of them, 
