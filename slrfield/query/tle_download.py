@@ -55,7 +55,7 @@ def tle_download(noradids):
         infile.close()
 
     st = SpaceTrackClient(username, password)
-    lines_3le = st.tle_latest(norad_cat_id=noradids,ordinal=1,iter_lines=True,format='3le')
+    lines_tle = st.tle_latest(norad_cat_id=noradids,ordinal=1,iter_lines=True,format='tle')
     
     # save TLE/3LE data to files
     dir_TLE = 'TLE/'   
@@ -67,16 +67,16 @@ def tle_download(noradids):
         mkdir(dir_TLE) 
         
     valid_ids = []
-    file_3le = open(dir_TLE+'satcat_3le.txt','w')
-    print('\nDownloading TLE/3LE data',end=' ... ')
-    for line in lines_3le:
+    file_tle = open(dir_TLE+'satcat_tle.txt','w')
+    print('\nDownloading TLE/TLE data',end=' ... ')
+    for line in lines_tle:
         words = line.split()
         if words[0] == '2': valid_ids.append(words[1])
-        file_3le.write(line+'\n')
-    file_3le.close()  
+        file_tle.write(line+'\n')
+    file_tle.close()  
     print('Complete')
     if type(noradids) is not list: noradids = [noradids]
     missing_ids = list(set(noradids)-set(valid_ids))
     if missing_ids: print('Note: TLE data for these targets are not avaliable: ',missing_ids) 
 
-    return dir_TLE+'satcat_3le.txt'       
+    return dir_TLE+'satcat_tle.txt'       
