@@ -4,7 +4,7 @@ from tqdm import tqdm
 from colorama import Fore
 from time import sleep
 
-def tqdm_ftp(ftp,dir_cpf_to,cpf_file):
+def tqdm_ftp(ftp,dir_cpf_to,cpf_file,desc):
     '''
     Try to download files from remote server by ftp.
     '''
@@ -37,7 +37,7 @@ def tqdm_ftp(ftp,dir_cpf_to,cpf_file):
                 return None     
 
 
-def tqdm_request(url,dir_cpf_to,cpf_file):
+def tqdm_request(url,dir_cpf_to,cpf_file,desc):
     '''
     Try to download files from remote server by request.
     '''
@@ -49,7 +49,7 @@ def tqdm_request(url,dir_cpf_to,cpf_file):
         try:
             local_file = open(dir_cpf_to + cpf_file, 'wb')
             pos = local_file.tell()
-            res = requests.get(url,stream=True,timeout=200)
+            res = requests.get(url,stream=True,timeout=200,headers={'Accept-Encoding': None,'Range': f'bytes={pos}-'})
             total_size = int(res.headers.get('Content-Length'))
             pbar = tqdm(desc = desc,total=total_size,unit='B',unit_scale=True,bar_format = bar_format,position=0,initial=pos)
             for chunk in res.iter_content(block_size):
