@@ -207,7 +207,7 @@ csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as 
 
 ## Change log
 
-- **0.1.12 — Jun 04,  2021**
+- **0.1.13 — Jun 05,  2021**
 
   Now you may inject the NORAD IDs of a large number of targets by an input file such as *noradids.txt* to  `target_query`.
 
