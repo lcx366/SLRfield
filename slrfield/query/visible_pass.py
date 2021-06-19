@@ -1,5 +1,4 @@
 from glob import glob
-from pathlib import Path
 from os import path,mkdir,remove
 
 import numpy as np
@@ -9,51 +8,51 @@ from skyfield.api import Topos,Loader,load
 from astropy.time import TimeDelta,Time
 from astropy import units as u
 
-from ..utils.try_download import tqdm_request
+from ..utils.data_download import download_eop,download_ephem
 
 def t_list(ts,t_start,t_end,t_step=60):
-    '''
+    """
     Generate a list of time moments based on start time, end time, and time step.
 
     Usage: 
     t = t_list(ts,t_start,t_end,t_step)
 
     Inputs:
-    ts -> [Skyfield time scale] Skyfield time scale system; it is constitutive of 'deltat.data', 'deltat.preds', and 'Leap_Second.dat'
+    ts      -> [Skyfield time scale] Skyfield time scale system; it is constitutive of 'deltat.data', 'deltat.preds', and 'Leap_Second.dat'
     t_start -> [object of class Astropy Time] Start time, such as Time('2020-06-01 00:00:00')
-    t_end -> [object of class Astropy Time] End time, such as Time('2020-06-30 00:00:00') 
+    t_end   -> [object of class Astropy Time] End time, such as Time('2020-06-30 00:00:00') 
 
     Parameters:
-    t_step -> [int, optional, default = 60] time step[seconds] 
+    t_step  -> [int, optional, default = 60] time step[seconds] 
 
     Outputs:
-    t -> [list of object of class Skyfield Time] list of time moments
-    '''
+    t       -> [list of object of class Skyfield Time] list of time moments
+    """
     dt = np.around((t_end - t_start).to(u.second).value)
     t_astropy = t_start + TimeDelta(np.append(np.arange(0,dt,t_step),dt), format='sec')
     t = ts.from_astropy(t_astropy)
     return t
        
 def next_pass(ts,t_start,t_end,sat,site,cutoff = 10):
-    '''
+    """
     Generate the space target passes in a time period.
 
     Usage: 
     passes = next_pass(ts,t_start,t_end,sat,site,cutoff)
 
     Inputs:
-    ts -> [Skyfield time scale] Skyfield time scale system; it is constitutive of 'deltat.data', 'deltat.preds', and 'Leap_Second.dat'
+    ts      -> [Skyfield time scale] Skyfield time scale system; it is constitutive of 'deltat.data', 'deltat.preds', and 'Leap_Second.dat'
     t_start -> [object of class Astropy Time] Start time, such as Time('2020-06-01 00:00:00')
-    t_end -> [object of class Astropy Time] End time, such as Time('2020-06-30 00:00:00') 
-    sat -> [object of class Skyfield satellite] Space target
-    site -> [object of class Skyfield Topos] Station
+    t_end   -> [object of class Astropy Time] End time, such as Time('2020-06-30 00:00:00') 
+    sat     -> [object of class Skyfield satellite] Space target
+    site    -> [object of class Skyfield Topos] Station
 
     Parameters:
-    cutoff -> [float, optional, default=10] Cutoff altitude angle
+    cutoff  -> [float, optional, default=10] Cutoff altitude angle
 
     Outputs:
-    t -> [list of object of class Skyfield Time] List of time moments
-    '''
+    t       -> [list of object of class Skyfield Time] List of time moments
+    """
     passes = []
     
     # Approximately calculate the orbital period[minutes] of a target relative to the rotating Earth
@@ -96,57 +95,38 @@ def next_pass(ts,t_start,t_end,sat,site,cutoff = 10):
     return passes
 
 def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautical',visible_duration=120):
-    '''
+    """
     Generate the visible passes of space targets in a time period.
 
     Usage: 
     visible_pass(start_time,end_time,site,timezone=8)
 
     Inputs:
-    start_time -> [str] start time, such as '2020-06-01 00:00:00'
-    end_time -> [str] end time, such as '2020-07-01 00:00:00'
-    site -> [list of str] geodetic coordinates of a station, such as ['21.03 N','157.80 W','1987.05']
+    start_time       -> [str] start time, such as '2020-06-01 00:00:00'
+    end_time         -> [str] end time, such as '2020-07-01 00:00:00'
+    site             -> [list of str] geodetic coordinates of a station, such as ['21.03 N','157.80 W','1987.05']
 
     Parameters:
-    timezone -> [int, optional, default=0] time zone, such as -10; if 0, then UTC is used.
-    cutoff -> [float, optional, default=10] Satellite Cutoff Altitude Angle
-    twilight -> [str, or float, optional, default='nautical'] Dark sign or solar cutoff angle; if 'dark', then the solar cutoff angle is less than -18 degrees;
+    timezone         -> [int, optional, default=0] time zone, such as -10; if 0, then UTC is used.
+    cutoff           -> [float, optional, default=10] Satellite Cutoff Altitude Angle
+    twilight         -> [str, or float, optional, default='nautical'] Dark sign or solar cutoff angle; if 'dark', then the solar cutoff angle is less than -18 degrees;
     if 'astronomical', then less than -12 degrees; if 'nautical', then less than -6 degrees; if 'civil', then less than -0.8333 degrees;
     alternatively, it also can be set to a specific number, for example, 4.0 degrees.
     visible_duration -> [int, optional, default=120] Duration[seconds] of a visible pass
 
     Outputs:
-    VisiblePasses_bysat.csv -> csv-format files that record visible passes in sort of target
+    VisiblePasses_bysat.csv  -> csv-format files that record visible passes in sort of target
     VisiblePasses_bydate.csv -> csv-format files that record visible passes in sort of date
     xxxx.txt -> one-day prediction files for targets
-    '''
-    home = str(Path.home())
-    direc_eph = home + '/src/skyfield-data/ephemeris/'
-    direc_time = home + '/src/skyfield-data/time_data/'
-    de430 = direc_eph + 'de430.bsp'
-
-    load_eph = Loader(direc_eph)
-    load_time = Loader(direc_time)
-
-    print('\nDownloading JPL ephemeris DE430 and timescale files',end=' ... \n')
-
-    # URL of JPL DE430
-    url = 'http://www.shareresearch.me/wp-content/uploads/2020/05/de430.bsp' 
-    '''
-    url = 'http://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de430.bsp'
-    url = 'https://repos.cosmos.esa.int/socci/projects/SPICE_KERNELS/repos/juice/browse/kernels/spk/de430.bsp'
-    '''
-    if not path.exists(de430):
-        desc = 'Downloading {:s}'.format('de430.bsp')
-        tqdm_request(url,direc_eph,'de430.bsp',desc)
-
-    print('Downloading timescale files',end=' ... \n')
-    ts = load_time.timescale()
-    planets = load_eph('de430.bsp')
+    """
+    dir_eop = download_eop()
+    dir_eph = download_ephem('de440')
     
-    # Print information about the time system file and ephemeris file
-    print(load_time.log)
-    print(load_eph.log)
+    load_eop = Loader(dir_eop)
+    load_eph = Loader(dir_eph)
+
+    ts = load_eop.timescale()
+    planets = load_eph('de440.bsp')
 
     print('\nCalculating one-day predictions and multiple-day visible passes for targets', end=' ... \n')
 
@@ -166,7 +146,7 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     dir_TLE = 'TLE/'
     dir_prediction = 'prediction/'
     sun,earth = planets['sun'],planets['earth']
-    sats = load.tle_file(dir_TLE+'satcat_3le.txt')
+    sats = load.tle_file(dir_TLE+'satcat_tle.txt')
     
     lon,lat,ele = site
     observer = Topos(lon, lat, elevation_m = float(ele)) 
@@ -231,15 +211,6 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
                     outfile.write('{:20s} {:>8.4f} {:>8.4f} {:>8.5f} {:>8.4f} {:>10.4f} {:>10.4f} {:>7d} \n'.format(t.utc_strftime('%Y-%m-%d %H:%M:%S')[i],sat_alt.degrees[i],sat_az.degrees[i],sat_ra.hours[i],sat_dec.degrees[i],sat_distance.km[i],sun_alt.degrees[i],visible[i]))
                 outfile.write('\n')
 
-        
-            '''
-            # Generate a one-day prediction in visibility period
-            if visible.any():
-                t_visible = np.array(t.utc_iso())[visible]
-                for i in range(len(t_visible)):
-                    outfile.write('{:20s} {:>8.4f} {:>8.4f} {:>8.5f} {:>8.4f} {:>10.4f} \n'.format(t_visible[i],sat_alt.degrees[visible][i],sat_az.degrees[visible][i],sat_ra.hours[visible][i],sat_dec.degrees[visible][i],sat_distance.km[visible][i]))
-                outfile.write('\n')
-            ''' 
         if not visible_flag:
             outfile0.write('{:s},{:s},{:d}\n\n'.format('','',noradid))
         else:
