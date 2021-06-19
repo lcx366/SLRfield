@@ -14,10 +14,6 @@ download_satcat - Download or update the satellites catalog file from www.celest
 
 celestrak_query - Query space targets that meet the requirements by setting a series of specific parameters from the the [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) database and the [CELESTRAK](https://celestrak.com) database.
 
-# tle_download.py
-
-tle_download - Download the TLE/3LE data from https://www.space-track.org
-
 # visible_pass.py
 
 t_list - Generate a list of time moments based on start time, end time, and time step.
