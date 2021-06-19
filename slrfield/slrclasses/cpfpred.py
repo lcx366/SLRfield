@@ -1,9 +1,9 @@
 from os import system,path,makedirs
 
-from ..cpf.cpf_interpolate import cpf_interpolate,itrs2horizon
+from ..cpf.cpf_interpolate import cpf_interpolate
 
 class CPFdata(object):
-    '''
+    """
     class CPFdata
 
         - attributes:
@@ -17,7 +17,7 @@ class CPFdata(object):
 
         - methods:
             - pred: predict the azimuth, altitude, distance of the target, and the time of flight for laser pulse etc. given the coordinates of the station
-    '''
+    """
     
     def __init__(self,data):
 
@@ -46,7 +46,7 @@ class CPFdata(object):
         return 'instance of class CPFdata'
 
     def pred(self,station,t_start,t_end,t_increment,coord_type='geodetic',mode='apparent'):
-        '''
+        """
         Predict the azimuth, altitude, distance of the target, and the time of flight for laser pulse etc. given the coordinates of the station.
 
         Usage:
@@ -55,15 +55,15 @@ class CPFdata(object):
         cpf_data.pred(station,t_start,t_end,t_increment,'geocentric','geometric')
 
         Inputs:
-        station -> [numercial array or list with 3 elements] coordinates of station. It can either be geocentric(x, y, z) coordinates or geodetic(lon, lat, height) coordinates.
+        station     -> [numercial array or list with 3 elements] coordinates of station. It can either be geocentric(x, y, z) coordinates or geodetic(lon, lat, height) coordinates.
         Unit for (x, y, z) are meter, and for (lon, lat, height) are degree and meter.
-        t_start -> [str] starting date and time for prediction, such as '2016-12-31 20:06:40'
+        t_start     -> [str] starting date and time for prediction, such as '2016-12-31 20:06:40'
         t_end -> [str] ending date and time for prediction, such as '2017-01-01 03:06:40'
         t_increment -> [int or float] time increment for prediction, such as 0.5, 1, 2 etc.; unit is in second
 
         Parameters:
-        coord_type -> [optional, str, default = 'geodetic'] coordinates type for coordinates of station; it can either be 'geocentric' or 'geodetic'.
-        mode -> [optional, str, default = 'apparent']  whether to consider the light time; if 'geometric', instantaneous position vector from station to target is computed; 
+        coord_type  -> [optional, str, default = 'geodetic'] coordinates type for coordinates of station; it can either be 'geocentric' or 'geodetic'.
+        mode        -> [optional, str, default = 'apparent']  whether to consider the light time; if 'geometric', instantaneous position vector from station to target is computed; 
         if 'apparent', position vector containing light time from station to target is computed.
 
         Outputs:
@@ -74,8 +74,7 @@ class CPFdata(object):
         In this case, the output prediction file will contain the difference between the receiving direction and the transmitting direction.
         (2) The 10-point(degree 9) Lagrange polynomial interpolation method is used to interpolate the cpf ephemeris.
         (3) The influence of leap second is considered in the prediction generation.
-        '''
-
+        """
         dir_pred_to = 'pred/'
         if not path.exists(dir_pred_to): 
             makedirs(dir_pred_to)   
