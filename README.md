@@ -5,11 +5,11 @@
 This package is an archive of scientific routines for data processing related to SLR(Satellite Laser Ranging). 
 Currently, operations on SLR data include:
 
-1. Automatically download the CPF(Consolidated Prediction Format) ephemeris file;
-2. Parse the CPF ephemeris file;
-3. Given the coordinates of a station predict the azimuth, altitude, distance of the target, and the time of flight for laser pulse etc.;
-4. Automatically download TLE/3LE data from [SPACETRACK](https://www.space-track.org);
-5. Pick out space targets that meets specific demands from [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) and [CELESTRAK](https://celestrak.com) database by setting a series of parameters, such as mass, shape, RCS(Radar Cross Section), and orbit altitude etc.;
+1. Download CPF(Consolidated Prediction Format) ephemeris files automatically from **CDDIS**(Crustal Dynamics Data Information System) or **EDC**(EUROLAS Data Center);
+2. Parse the CPF ephemeris files;
+3. Given the position of a site, predict the azimuth, altitude, distance of targets, and the time of flight for laser pulse etc.;
+4. Download the TLE/3LE data from [SPACETRACK](https://www.space-track.org) automatically;
+5. Pick out targets from [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) and [CELESTRAK](https://celestrak.com) database by setting a series of parameters, such as mass, shape, RCS(Radar Cross Section), and orbit altitude etc.;
 6. Calculate one-day prediction and multiple-day visible passes for space targets based on the TLE/3LE data;
 
 ## How to Install
@@ -25,19 +25,17 @@ pip install slrfield --upgrade # to upgrade a pre-existing installation
 
 ### Download the latest CPF ephemeris files at the current moment
 
-In this package, for prediction data centers, only **CDDIS**(Crustal Dynamics Data Information System) and **EDC**(EUROLAS Data Center) are available. If the prediction data center is not provided, then it is set to **CDDIS** by default.
+If the prediction release center is not provided, the CPF ephemeris files are downloaded from **CDDIS** by default.
 
 #### Download all available targets
 
-The data storage directory(such as CPF/CDDIS/2020-10-02) will be automatically created or ***emptied***(if exist) by default ahead of requesting and downloading CPF files .
+A data storage directory, such as CPF/CDDIS/2020-10-02, will be automatically created.  If it already exists, it will be ***emptied*** by default once the download starts. By setting `append = True`, the data storage directory will  ***not*** be ***emptied***.
 
 ```python
 >>> from slrfield import cpf_download
 >>> cpf_files_all = cpf_download() # From CDDIS by default
 >>> # cpf_files_all = cpf_download(source = 'EDC') # From EDC
 ```
-
-By setting `append = True`, the data storage directory will  ***not*** be ***emptied***(if exist)  ahead of requesting and downloading CPF files .
 
 ```python
 >>> cpf_files_append = cpf_download(['beaconc','lageos1'],append=True)
@@ -188,14 +186,15 @@ Download the TLE/3LE data from [SPACE-TRACK](https://www.space-track.org); befor
 from slrfield import tle_download
 noradids = list(targets_df['NORADID'])
 # noradids = 'satno.txt'
-tle_download(noradids)
+satcat_tle = tle_download(noradids)
 ```
 
-A  text file *satcat_3le.txt* will be created in the directory TLE.
+A  text file *satcat_tle.txt* will be created in the directory TLE.
 
 ### Calculate the visible passes for target transit
 
 ```python
+from slrfield import visible_pass
 t_start = '2020-06-08 23:00:00' # starting date and time 
 t_end = '2020-06-11 00:00:00' # ending date and time
 timezone = 8 # timezone
@@ -206,6 +205,10 @@ visible_pass(t_start,t_end,site,timezone)
 csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as well as a set of text file xxxx.txt will be created in the directory prediction, where 'xxxx' represents the NORADID of the target.
 
 ## Change log
+
+- **0.1.14 — Jun 18,  2021**
+
+  Fixed the problem that EOP could not be downloaded normally from IERS.
 
 - **0.1.13 — Jun 05,  2021**
 
