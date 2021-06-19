@@ -6,28 +6,27 @@ from scipy.interpolate import BarycentricInterpolator
 from scipy.constants import speed_of_light
 
 def cpf_interpolate(ts_utc_cpf,ts_mjd_cpf,ts_sod_cpf,leap_second_cpf,positions_cpf,t_start,t_end,t_increment,mode,station,coord_type):
-    '''
+    """
     Interpolate the CPF ephemeris and make the prediction
 
     Usage: 
     ts_iso,ts_mjd,ts_sod,az,alt,r,tof1 = cpf_interpolate(ts_utc_cpf,ts_mjd_cpf,ts_sod_cpf,leap_second_cpf,positions_cpf,t_start,t_end,t_increment,mode,station,coord_type)
     ts_iso,ts_mjd,ts_sod,az_trans,alt_trans,delta_az,delta_alt,r_trans,tof2 = cpf_interpolate(ts_utc_cpf,ts_mjd_cpf,ts_sod_cpf,leap_second_cpf,positions_cpf,t_start,t_end,t_increment,mode,station,coord_type)
 
-
     Inputs:
-    ts_utc_cpf -> [str array] iso-formatted UTC for CPF ephemeris 
-    ts_mjd_cpf -> [int array] MJD for CPF ephemeris 
-    ts_sod_cpf -> [float array] Second of Day for CPF ephemeris 
+    ts_utc_cpf      -> [str array] iso-formatted UTC for CPF ephemeris 
+    ts_mjd_cpf      -> [int array] MJD for CPF ephemeris 
+    ts_sod_cpf      -> [float array] Second of Day for CPF ephemeris 
     leap_second_cpf -> [int array] Leap second for CPF ephemeris 
-    positions_cpf -> [2d float array] target positions in cartesian coords in meters w.r.t. ITRF for CPF ephemeris 
-    t_start -> [str] starting date and time of ephemeris 
-    t_end -> [str] ending date and time of ephemeris
-    t_increment -> [float or int] time increment in second for ephemeris interpolation, such as 0.5, 1, 2, 5, etc. 
-    mode -> [str] whether to consider the light time; if 'geometric', instantaneous position vector from station to target is computed; 
+    positions_cpf   -> [2d float array] target positions in cartesian coords in meters w.r.t. ITRF for CPF ephemeris 
+    t_start         -> [str] starting date and time of ephemeris 
+    t_end           -> [str] ending date and time of ephemeris
+    t_increment     -> [float or int] time increment in second for ephemeris interpolation, such as 0.5, 1, 2, 5, etc. 
+    mode            -> [str] whether to consider the light time; if 'geometric', instantaneous position vector from station to target is computed; 
     if 'apparent', position vector containing light time from station to target is computed.
-    station -> [numercial array or list with 3 elements] coordinates of station. It can either be geocentric(x, y, z) coordinates or geodetic(lon, lat, height) coordinates.
+    station         -> [numercial array or list with 3 elements] coordinates of station. It can either be geocentric(x, y, z) coordinates or geodetic(lon, lat, height) coordinates.
     Unit for (x, y, z) are meter, and for (lon, lat, height) are degree and meter.
-    coord_type -> [str] coordinates type for coordinates of station; it can either be 'geocentric' or 'geodetic'.
+    coord_type      -> [str] coordinates type for coordinates of station; it can either be 'geocentric' or 'geodetic'.
 
     Outputs:
     (1) If the mode is 'geometric', then the transmitting direction of the laser coincides with the receiving direction at a certain moment. 
@@ -35,23 +34,23 @@ def cpf_interpolate(ts_utc_cpf,ts_mjd_cpf,ts_sod_cpf,leap_second_cpf,positions_c
     ts_iso -> [str array] iso-formatted UTC for interpolated prediction
     ts_mjd -> [int array] MJD for interpolated prediction
     ts_sod -> [float array] Second of Day for for interpolated prediction
-    az -> [float array] Azimuth for interpolated prediction in degrees
-    alt -> [float array] Altitude for interpolated prediction in degrees
-    r -> [float array] Range for interpolated prediction in meters
-    tof1 -> [float array] Time of flight for interpolated prediction in seconds
+    az     -> [float array] Azimuth for interpolated prediction in degrees
+    alt    -> [float array] Altitude for interpolated prediction in degrees
+    r      -> [float array] Range for interpolated prediction in meters
+    tof1   -> [float array] Time of flight for interpolated prediction in seconds
 
     (2) If the mode is 'apparent', then the transmitting direction of the laser is inconsistent with the receiving direction at a certain moment. 
-    ts_iso -> [str array] iso-formatted UTC for interpolated prediction
+    ts_iso    -> [str array] iso-formatted UTC for interpolated prediction
     In this case, the light time is considered and the outputs are
-    ts_mjd -> [int array] MJD for interpolated prediction
-    ts_sod -> [float array] Second of Day for for interpolated prediction
-    az_trans -> [float array] Transmitting azimuth for interpolated prediction in degrees
+    ts_mjd    -> [int array] MJD for interpolated prediction
+    ts_sod    -> [float array] Second of Day for for interpolated prediction
+    az_trans  -> [float array] Transmitting azimuth for interpolated prediction in degrees
     alt_trans -> [float array] Transmitting altitude for interpolated prediction in degrees
-    delta_az -> [float array] The difference of azimuth between the receiving direction and the transmitting direction in degrees
+    delta_az  -> [float array] The difference of azimuth between the receiving direction and the transmitting direction in degrees
     delta_alt -> [float array] The difference of altitude between the receiving direction and the transmitting direction in degrees
-    r_trans -> [float array] Transmitting range for interpolated prediction in meters
-    tof2 -> [float array] Time of flight for interpolated prediction in seconds
-    '''
+    r_trans   -> [float array] Transmitting range for interpolated prediction in meters
+    tof2      -> [float array] Time of flight for interpolated prediction in seconds
+    """
     t_start,t_end = Time(t_start),Time(t_end)
     t_start_interp,t_end_interp = Time(ts_utc_cpf[4]),Time(ts_utc_cpf[-5])
     
@@ -110,7 +109,7 @@ def cpf_interpolate(ts_utc_cpf,ts_mjd_cpf,ts_sod_cpf,leap_second_cpf,positions_c
         raise Exception("Mode must be 'geometric' or 'apparent'.")      
 
 def interp_ephem(ts_quasi_mjd,ts_quasi_mjd_cpf,positions_cpf):
-    '''
+    """
     Interpolate the CPF ephemeris using the 10-point(degree 9) Lagrange polynomial interpolation method. 
 
     Usage: 
@@ -123,13 +122,13 @@ def interp_ephem(ts_quasi_mjd,ts_quasi_mjd_cpf,positions_cpf):
     The day of '2016-12-31' has 86401 seconds, and for conventional MJD calculation, one second is compressed to a 86400/86401 second. 
     Hence, the quasi MJD is defined for convenience of interpolation.
 
-    ts_quasi_mjd -> [float array] quasi MJD for interpolated prediction
+    ts_quasi_mjd     -> [float array] quasi MJD for interpolated prediction
     ts_quasi_mjd_cpf -> [float array] quasi MJD for CPF ephemeris
-    positions_cpf -> [2d float array] target positions in cartesian coordinates in meters w.r.t. ITRF for CPF ephemeris. 
+    positions_cpf    -> [2d float array] target positions in cartesian coordinates in meters w.r.t. ITRF for CPF ephemeris. 
 
     Outputs:
-    positions -> [2d float array] target positions in cartesian coordinates in meters w.r.t. ITRF for interpolated prediction.
-    '''
+    positions        -> [2d float array] target positions in cartesian coordinates in meters w.r.t. ITRF for interpolated prediction.
+    """
     positions = []
 
     m = len(ts_quasi_mjd)
@@ -153,25 +152,25 @@ def interp_ephem(ts_quasi_mjd,ts_quasi_mjd_cpf,positions_cpf):
     return positions    
 
 def itrs2horizon(station,ts,ts_quasi_mjd,positions,coord_type):
-    '''
+    """
     Convert cartesian coordinates of targets in ITRF to spherical coordinates in topocentric reference frame for a specific station.
 
     Usage: 
     az,alt,r = itrs2horizon(station,ts,ts_quasi_mjd,positions,coord_type)
 
     Inputs:
-    station -> [numercial array or list with 3 elements] coordinates of station. It can either be geocentric(x, y, z) coordinates or geodetic(lon, lat, height) coordinates.
+    station      -> [numercial array or list with 3 elements] coordinates of station. It can either be geocentric(x, y, z) coordinates or geodetic(lon, lat, height) coordinates.
     Unit for (x, y, z) are meter, and for (lon, lat, height) are degree and meter.
-    ts -> [str array] iso-formatted UTC for interpolated prediction
+    ts           -> [str array] iso-formatted UTC for interpolated prediction
     ts_quasi_mjd -> [float array] quasi MJD for interpolated prediction
-    positions -> [2d float array] target positions in cartesian coordinates in meters w.r.t. ITRF for interpolated prediction.
-    coord_type -> [str] coordinates type for coordinates of station; it can either be 'geocentric' or 'geodetic'.
+    positions    -> [2d float array] target positions in cartesian coordinates in meters w.r.t. ITRF for interpolated prediction.
+    coord_type   -> [str] coordinates type for coordinates of station; it can either be 'geocentric' or 'geodetic'.
 
     Outputs:
-    az -> [float array] Azimuth for interpolated prediction in degrees
-    alt -> [float array] Altitude for interpolated prediction in degrees
-    r -> [float array] Range for interpolated prediction in meters
-    '''
+    az           -> [float array] Azimuth for interpolated prediction in degrees
+    alt          -> [float array] Altitude for interpolated prediction in degrees
+    r            -> [float array] Range for interpolated prediction in meters
+    """
     if coord_type == 'geocentric':
         x,y,z = station
         site = EarthLocation.from_geocentric(x, y, z, unit='m')
@@ -187,18 +186,18 @@ def itrs2horizon(station,ts,ts_quasi_mjd,positions,coord_type):
     return az,alt,r
 
 def iso2sod(ts):
-    '''
+    """
     Calculate the Second of Day from the iso-formatted UTC time sets.
 
     Usage: 
     sods = iso2sod(ts)
 
     Inputs:
-    ts -> [str array] iso-formatted UTC time sets
+    ts   -> [str array] iso-formatted UTC time sets
 
     Outputs:
     sods -> [float array] second of day
-    '''
+    """
     sods = []
     for t in ts:
         sod = int(t[11:13])*3600 + int(t[14:16])*60 + float(t[17:])
