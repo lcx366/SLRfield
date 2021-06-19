@@ -4,7 +4,7 @@ from astropy.time import Time,TimeDelta
 from ..slrclasses.cpfpred import CPFdata
 
 def read_cpf(cpf_file):
-    '''
+    """
     Parse a single CPF ephemeris file and read the data.
 
     Usage: 
@@ -14,14 +14,14 @@ def read_cpf(cpf_file):
     cpf_file -> [str] the name of CPF ephemeris file, such as 'ajisai_cpf_170829_7411.hts'
 
     Outputs:
-    data -> [dictionary] a python dictionary containing the main information of the CPF ephemeris file. 
+    data     -> [dictionary] a python dictionary containing the main information of the CPF ephemeris file. 
     The information includes the following contents:
     (1) Format; (2) Format Version (3) Ephemeris Source (4) date of ephemeris production (5) Ephemeris Sequence number
     (6) Target name (7) COSPAR ID (8) SIC (9) NORAD ID (10) Starting date and time (11) Ending date and time
     (12) Time between table entries (UTC seconds) (13) Target type (14) Reference frame (15) Rotational angle type
     (16) Center of mass correction (17) Direction type (18) Modified Julian Date (19) Seconds of Day (20) Leap_Second
     (21) time in UTC (22) target positions in meters
-    '''
+    """
     cpf_data = open(cpf_file,'r').readlines()
     data = {'MJD':[],'SoD':[],'positions[m]':[],'Leap_Second':[]}
     for line in cpf_data:
@@ -108,7 +108,7 @@ def read_cpf(cpf_file):
     return data
 
 def read_cpfs(cpf_files):
-    '''
+    """
     Parse a single CPF ephemeris file of a set of CPF ephemeris files and read the data.
 
     Usage: 
@@ -119,8 +119,8 @@ def read_cpfs(cpf_files):
     or list of filenames, such as ['CPF/EDC/2016-12-31/starlette_cpf_161231_8661.sgf','CPF/CDDIS/2020-04-15/lageos1_cpf_200415_6061.jax']
 
     Outputs:
-    cpf_data -> [object] instance of class CPFdata
-    '''
+    cpf_data  -> [object] instance of class CPFdata
+    """
     data = []
 
     if type(cpf_files) is str: cpf_files = [cpf_files]
