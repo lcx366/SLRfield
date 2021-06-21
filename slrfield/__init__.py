@@ -11,8 +11,15 @@ Currently, operations on SLR data include:
 5. Pick out targets from [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) and [CELESTRAK](https://celestrak.com) database by setting a series of parameters, such as mass, shape, RCS(Radar Cross Section), and orbit altitude etc.;
 6. Calculate one-day prediction and multiple-day visible passes for space targets based on the TLE/3LE data;
 """
+from astropy.utils import iers
+
 from .cpf.cpf_download import cpf_download
 from .cpf.cpf_read import read_cpfs
 from .query.query import discos_query,celestrak_query,target_query
-from .utils.data_download import tle_download
 from .query.visible_pass import visible_pass
+from .utils.data_download import tle_download
+from .utils import data_prepare
+
+dir_eop = data_prepare.dir_eop
+iers_a = iers.IERS_A.open(dir_eop + 'finals2000A.all')  
+eop_table = iers.earth_orientation_table.set(iers_a)

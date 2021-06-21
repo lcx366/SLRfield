@@ -4,21 +4,20 @@ from os import path,mkdir,remove
 import numpy as np
 import pandas as pd
 
-from skyfield.api import Topos,Loader,load
+from skyfield.api import Topos,load
 from astropy.time import TimeDelta,Time
 from astropy import units as u
 
-from ..utils.data_download import download_eop,download_ephem
+from ..utils import data_prepare
 
-def t_list(ts,t_start,t_end,t_step=60):
+def t_list(t_start,t_end,t_step=60):
     """
     Generate a list of time moments based on start time, end time, and time step.
 
     Usage: 
-    t = t_list(ts,t_start,t_end,t_step)
+    t = t_list(t_start,t_end,t_step)
 
     Inputs:
-    ts      -> [Skyfield time scale] Skyfield time scale system; it is constitutive of 'deltat.data', 'deltat.preds', and 'Leap_Second.dat'
     t_start -> [object of class Astropy Time] Start time, such as Time('2020-06-01 00:00:00')
     t_end   -> [object of class Astropy Time] End time, such as Time('2020-06-30 00:00:00') 
 
@@ -28,20 +27,20 @@ def t_list(ts,t_start,t_end,t_step=60):
     Outputs:
     t       -> [list of object of class Skyfield Time] list of time moments
     """
+    ts = data_prepare.ts
     dt = np.around((t_end - t_start).to(u.second).value)
     t_astropy = t_start + TimeDelta(np.append(np.arange(0,dt,t_step),dt), format='sec')
     t = ts.from_astropy(t_astropy)
     return t
        
-def next_pass(ts,t_start,t_end,sat,site,cutoff = 10):
+def next_pass(t_start,t_end,sat,site,cutoff = 10):
     """
     Generate the space target passes in a time period.
 
     Usage: 
-    passes = next_pass(ts,t_start,t_end,sat,site,cutoff)
+    passes = next_pass(t_start,t_end,sat,site,cutoff)
 
     Inputs:
-    ts      -> [Skyfield time scale] Skyfield time scale system; it is constitutive of 'deltat.data', 'deltat.preds', and 'Leap_Second.dat'
     t_start -> [object of class Astropy Time] Start time, such as Time('2020-06-01 00:00:00')
     t_end   -> [object of class Astropy Time] End time, such as Time('2020-06-30 00:00:00') 
     sat     -> [object of class Skyfield satellite] Space target
@@ -53,13 +52,14 @@ def next_pass(ts,t_start,t_end,sat,site,cutoff = 10):
     Outputs:
     t       -> [list of object of class Skyfield Time] List of time moments
     """
+    ts = data_prepare.ts
     passes = []
     
     # Approximately calculate the orbital period[minutes] of a target relative to the rotating Earth
     P = 2*np.pi/(sat.model.no - np.pi/(12*60)) 
     # Determine the time step[seconds]
     t_step = int(np.round(60*np.sqrt(P/120))) 
-    t = t_list(ts,t_start,t_end,t_step)
+    t = t_list(t_start,t_end,t_step)
 
     # Calculate the target position relative to the station in ICRS
     sat_site = (sat - site).at(t)
@@ -119,14 +119,8 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     VisiblePasses_bydate.csv -> csv-format files that record visible passes in sort of date
     xxxx.txt -> one-day prediction files for targets
     """
-    dir_eop = download_eop()
-    dir_eph = download_ephem('de440')
-    
-    load_eop = Loader(dir_eop)
-    load_eph = Loader(dir_eph)
 
-    ts = load_eop.timescale()
-    planets = load_eph('de440.bsp')
+    planets = data_prepare.planets
 
     print('\nCalculating one-day predictions and multiple-day visible passes for targets', end=' ... \n')
 
@@ -175,7 +169,7 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
     for sat in sats:
         visible_flag = False
         noradid = sat.model.satnum
-        passes = next_pass(ts,t_start,t_end,sat,observer,cutoff)
+        passes = next_pass(t_start,t_end,sat,observer,cutoff)
         if not passes: 
             continue
         else:
@@ -183,17 +177,15 @@ def visible_pass(start_time,end_time,site,timezone=0,cutoff=10,twilight='nautica
             outfile.write('# {:18s} {:8s} {:8s} {:8s} {:8s} {:10s} {:14s} {:7s} \n'.format('Date and Time(UTC)','Alt[deg]','Az[deg]','Ra[h]','Dec[deg]','Range[km]','Solar Alt[deg]','Visible')) 
 
         for pass_start,pass_end in passes:
-            t = t_list(ts,Time(pass_start),Time(pass_end),1)
+            t = t_list(Time(pass_start),Time(pass_end),1)
             sat_observer = (sat - observer).at(t)
             sat_alt, sat_az, sat_distance = sat_observer.altaz()
             sat_ra, sat_dec, sat_distance = sat_observer.radec() 
             sun_observer = (earth+observer).at(t).observe(sun).apparent()
             sun_alt, sun_az, sun_distance = sun_observer.altaz()
             sun_beneath = sun_alt.degrees < sun_alt_cutoff 
-            #shadow = eclipsed(sat,sun,earth,t) 
             sunlight = sat.at(t).is_sunlit(planets)
             # Under the premise of satellite transit, visibility requires at least two conditions to be met: dark and outside the earth shadow.
-            #visible = sun_beneath & ~shadow
             visible = sun_beneath & sunlight
         
             if visible.any():

@@ -44,7 +44,7 @@ A data storage directory, such as CPF/CDDIS/2020-10-02, will be automatically cr
 #### Download a set of specified targets
 
 ```python
->>> sat_lists = ['ajisai','lageos1','hy2a','etalon2','jason3']
+>>> sat_lists = ['ajisai','lageos1','etalon2','jason3']
 >>> cpf_files_cddis = cpf_download(sat_lists) # From CDDIS
 >>> cpf_files_edc = cpf_download(sat_lists,source = 'EDC') # From EDC
 ```
