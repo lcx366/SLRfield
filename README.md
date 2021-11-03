@@ -162,7 +162,7 @@ Pick out space targets that meets specific orbital demands from the  [CELESTRAK]
 
 ``` python
 from slrfield import celestrak_query
-result = celestrak_query(Payload=False,Decayed=False,MeanAlt=None=[400,1000],sort='-Inclination')
+result = celestrak_query(Payload=False,Decayed=False,MeanAlt=[400,1000],sort='-Inclination')
 ```
 
 A pandas dataframe and a csv-formatted file *celestrak_catalog.csv* will be returned. 
@@ -205,6 +205,10 @@ visible_pass(t_start,t_end,site,timezone)
 csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as well as a set of text file xxxx.txt will be created in the directory prediction, where 'xxxx' represents the NORADID of the target.
 
 ## Change log
+
+- **0.1.15 — Nov 03,  2021**
+
+  Fixed the problem of response failure caused by accessing a large amount of data from discos remote server using API
 
 - **0.1.14 — Jun 18,  2021**
 

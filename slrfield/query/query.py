@@ -4,6 +4,7 @@ from os import path,makedirs,remove
 from pathlib import Path
 import requests
 from datetime import datetime,timedelta
+from time import sleep
 
 from ..utils.try_download import tqdm_request
 
@@ -247,7 +248,7 @@ def discos_query(COSPARID=None,NORADID=None,ObjectClass=None,Payload=None,Decaye
         doc = response.json()
 
         if response.ok:
-            if not doc['data']: raise Exception('No entries found that meet the conditions, please reset the filter parameters.')
+            if not doc['data']: raise Exception('No entries found, please reset the filter parameters.')
             data = doc['data']
             for element in data:
                 extract.append(element['attributes'])
@@ -260,6 +261,8 @@ def discos_query(COSPARID=None,NORADID=None,ObjectClass=None,Payload=None,Decaye
                 params['page[number]'] += 1
             else:
                 break
+
+            if currentPage%20 == 0: sleep(30) # Pause for 15 seconds to avoid excessive API access frequency    
         else:
             return doc['errors']
     
