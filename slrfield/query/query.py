@@ -5,6 +5,7 @@ from pathlib import Path
 import requests
 from datetime import datetime,timedelta
 from time import sleep
+from colorama import Fore
 
 from ..utils.try_download import tqdm_request
 
@@ -254,8 +255,8 @@ def discos_query(COSPARID=None,NORADID=None,ObjectClass=None,Payload=None,Decaye
                 extract.append(element['attributes'])
             currentPage = doc['meta']['pagination']['currentPage']
             totalPages = doc['meta']['pagination']['totalPages']
-            
-            print('CurrentPage {:3d} in TotalPages {:3d}'.format(currentPage,totalPages))
+            desc = 'CurrentPage {:s}{:3d}{:s} in TotalPages {:3d}'.format(Fore.GREEN,currentPage,Fore.RESET,totalPages)
+            print(desc,end='\r')
             
             if currentPage < totalPages: 
                 params['page[number]'] += 1
