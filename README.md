@@ -206,9 +206,10 @@ csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as 
 
 ## Change log
 
-- **0.1.15 — Nov 03,  2021**
+- **0.1.16 — Nov 04,  2021**
 
-  Fixed the problem of response failure caused by accessing a large amount of data from discos remote server using API
+  - Fixed the problem of response failure caused by accessing a large amount of data from discos remote server using API
+  - Change the process printing style of query from static to dynamic with color
 
 - **0.1.14 — Jun 18,  2021**
 
