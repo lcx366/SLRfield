@@ -164,7 +164,7 @@ def tle_download(noradids):
         lines_tle = st.tle_latest(norad_cat_id=part,ordinal=1,iter_lines=True,format='tle')    
         for line in lines_tle:
             words = line.split()
-            if words[0] == '2': valid_ids.append(words[1])
+            if words[0] == '2': valid_ids.append(words[1].lstrip('0'))
             file_tle.write(line+'\n')
         sleep(5) 
         j += 1   
