@@ -6,6 +6,8 @@ from pathlib import Path
 from ftplib import FTP
 from datetime import datetime,timedelta
 from spacetrack import SpaceTrackClient
+from time import sleep
+from colorama import Fore
 
 from .try_download import tqdm_ftp,tqdm_request
 
@@ -80,7 +82,7 @@ def download_ephem(eph,dir_to=None):
         desc = "Downloading the JPL ephemeris file '{:s}' from NAIF".format(eph)
         tqdm_request(url,dir_to,file,desc)
     else:
-    	print("The JPL ephemeris file '{:s}' is already in {:s}.".format(file,dir_to)) 
+        print("The JPL ephemeris file '{:s}' is already in {:s}.".format(file,dir_to)) 
 
     return dir_to 
 
@@ -107,14 +109,20 @@ def tle_download(noradids):
     # Check whether a list is empty or not
     if not noradids: raise Exception('noradids is empty.')
 
-    if type(noradids) is int:
-        noradids = str(noradids)  
-    elif type(noradids) is list:
+    if type(noradids) is list:
         if type(noradids[0]) is int: noradids = [str(i) for i in noradids]    
-    elif '.' in noradids: # noradids as a file
-        noradids = list(set(np.loadtxt(noradids,dtype=np.str)))
     else:
-        pass        
+        noradids = str(noradids)
+        if '.' in noradids: # noradids as a file
+            noradids = list(set(np.loadtxt(noradids,dtype=str)))
+        else:
+            noradids = [noradids]    
+    
+    # Set the maximum of requested URL's length with a single access 
+    # The setup prevents exceeding the capacity limit of the server
+    n = 500
+    noradids_parts = [noradids[i:i + n] for i in range(0, len(noradids), n)]  
+    part_num = len(noradids_parts)    
     
     # username and password for Space-Track
     home = str(Path.home())
@@ -134,9 +142,6 @@ def tle_download(noradids):
         username = infile.readline().strip()
         password = infile.readline().strip()
         infile.close()
-
-    st = SpaceTrackClient(username, password)
-    lines_tle = st.tle_latest(norad_cat_id=noradids,ordinal=1,iter_lines=True,format='tle')
     
     # save TLE/3LE data to files
     dir_TLE = 'TLE/'   
@@ -146,18 +151,30 @@ def tle_download(noradids):
             remove(file)
     else:
         mkdir(dir_TLE) 
-        
-    valid_ids = []
-    file_tle = open(dir_TLE+'satcat_tle.txt','w')
-    print('Downloading TLE data',end=' ... ')
-    for line in lines_tle:
-        words = line.split()
-        if words[0] == '2': valid_ids.append(words[1])
-        file_tle.write(line+'\n')
-    file_tle.close()  
-    print('Complete')
-    if type(noradids) is not list: noradids = [noradids]
-    missing_ids = list(set(noradids)-set(valid_ids))
-    if missing_ids: print('Note: TLE data for these targets are not avaliable: ',missing_ids) 
 
-    return dir_TLE+'satcat_tle.txt'          
+    valid_ids,j = [],1
+    date_str = datetime.utcnow().strftime("%Y%m%d")
+    filename_tle = dir_TLE + 'tle_{:s}.txt'.format(date_str)
+    file_tle = open(filename_tle,'w')  
+
+    st = SpaceTrackClient(username, password)
+    for part in noradids_parts:
+        desc = 'Downloading TLE data: Part {:s}{:2d}{:s} of {:2d}'.format(Fore.BLUE,j,Fore.RESET,part_num)
+        print(desc,end='\r')
+        lines_tle = st.tle_latest(norad_cat_id=part,ordinal=1,iter_lines=True,format='tle')    
+        for line in lines_tle:
+            words = line.split()
+            if words[0] == '2': valid_ids.append(words[1])
+            file_tle.write(line+'\n')
+        sleep(5) 
+        j += 1   
+    file_tle.close()
+
+    missed_ids = list(set(noradids)-set(valid_ids))
+    if missed_ids: 
+        missed_ids_filename = dir_TLE + 'missed_ids.txt'
+        desc = '{:s}Note: space targets with unavailable TLE are stored in {:s}.{:s} '.format(Fore.RED,missed_ids_filename,Fore.RESET)
+        print(desc) 
+        np.savetxt(missed_ids_filename,missed_ids,fmt='%s')
+
+    return filename_tle        
