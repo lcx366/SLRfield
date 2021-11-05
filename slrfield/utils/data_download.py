@@ -86,25 +86,29 @@ def download_ephem(eph,dir_to=None):
 
     return dir_to 
 
-def tle_download(noradids):
+def tle_download(noradids,mode='keep'):
     '''
     Download the TLE/3LE data from https://www.space-track.org
 
     Usage: 
-    tlefile = tle_download(noradids)
-    tlefile = tle_download('satno.txt')
+        tlefile = tle_download(noradids)
+        tlefile = tle_download(noradids,'clear')
+        tlefile = tle_download('satno.txt')
 
     Inputs:
-    noradids -> [str, int, list of str/int] NORADID of space targets. 
-    It can be a single NORADID, list of NORADID, or a file containing a set of NORADID.
-    The form and format of the file is as follows:
-    #satno
-    12345
-    23469
-    ...
+        noradids -> [str, int, list of str/int] NORADID of space targets. 
+        It can be a single NORADID, list of NORADID, or a file containing a set of NORADID.
+        The form and format of the file is as follows:
+        #satno
+        12345
+        23469
+        ...
+
+    Parameters:
+        mode -> [str,default='keep'] either keep the files stored in TLE directory or clear the TLE directory 
 
     Outputs: 
-    tlefile  -> [str] Path of TLE/3LE file.
+        tlefile  -> [str] Path of TLE/3LE file.
     '''
     # Check whether a list is empty or not
     if not noradids: raise Exception('noradids is empty.')
@@ -147,8 +151,9 @@ def tle_download(noradids):
     dir_TLE = 'TLE/'   
     fileList_TLE = glob(dir_TLE+'*')
     if path.exists(dir_TLE):
-        for file in fileList_TLE:
-            remove(file)
+        if mode == 'clear':
+            for file in fileList_TLE:
+                remove(file)
     else:
         mkdir(dir_TLE) 
 
