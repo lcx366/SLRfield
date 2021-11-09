@@ -8,6 +8,8 @@ from time import sleep
 from colorama import Fore
 
 from ..utils.try_download import tqdm_request
+from ..utils import Const
+
 
 def discos_buildin_filter(params,expr):
     """
@@ -307,7 +309,7 @@ def download_satcat():
             print('The satellite catalog in {:s} is already the latest.'.format(direc))    
     return scfile
 
-def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDate=None,OrbitalPeriod=None,Inclination=None,ApoAlt=None,PerAlt=None,MeanAlt=None,Country=None,sort=None,outfile=True):
+def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDate=None,OrbitalPeriod=None,Inclination=None,ApoAlt=None,PerAlt=None,MeanAlt=None,Ecc=None,Country=None,sort=None,outfile=True):
     """
     Query space targets that meet the requirements by setting a series of specific parameters from the [CELESTRAK](https://celestrak.com) database.
 
@@ -324,7 +326,8 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
     Inclination   -> [list of float with 2 elemnts, optional, default = None] Orbit inclination[degrees] of targets; must be in form of [inc1,inc2], such as [45.0,80.0]; if None, this option is ignored.  
     ApoAlt        -> [list of float with 2 elemnts, optional, default = None] Apogee Altitude[km] of targets; it must be in form of [apoalt1,apoalt2], such as [800.0,1400.0]; if None, this option is ignored.  
     PerAlt        -> [list of float with 2 elemnts, optional, default = None] Perigee Altitude[km] of targets; it must be in form of [peralt1,peralt2], such as [300.0,400.0]; if None, this option is ignored.  
-    MeanAlt       -> [list of float with 2 elemnts, optional, default = None] Mean Altitude[km] of targets; it must be in form of [meanalt1,meanalt2], such as [300.0,800.0]; if None, then option is ignored.  
+    MeanAlt       -> [list of float with 2 elemnts, optional, default = None] Mean Altitude[km] of targets; it must be in form of [meanalt1,meanalt2], such as [300.0,800.0]; if None, then option is ignored. 
+    Ecc           -> [list of float with 2 elemnts, optional, default = None] Eccentricity of targets; it must be in form of [ecc1,ecc2], such as [0.01,0.2]; if None, then option is ignored.   
     Country       -> [str or list of str, optional, default = None] Satellite Ownership; country codes/names can be found at http://www.fao.org/countryprofiles/iso3list/en/; if None, this option is ignored.
     sort          -> [str, optional, default = None] sort by features of targets in a specific order, such as by mass; avaliable options include 'COSPARID', NORADID', 'DecayDate', 'OrbitalPeriod', 'Inclination', 'ApoAlt', 'PerAlt', 'MeanAlt', and 'Country'.
     If there is a negative sign '-' ahead, such as "-DecayDate", it will be sorted in descending order. If None, then sort by NORADID by default.
@@ -343,11 +346,13 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
     data.columns = ['COSPARID', 'NORADID', 'Multiple Name Flag', 'Payload Flag','Operational Status Code','Satellite Name',\
                     'Country','Launch Date','Launch Site','Decay Date','Orbital Period[min]','Inclination[deg]',\
                     'Apogee Altitude[km]','Perigee Altitude[km]','Radar Cross Section[m2]','Orbital Status Code']
-
+    
     Mean_Alltitude = (data['Apogee Altitude[km]'] + data['Perigee Altitude[km]'])/2 # Compute the mean alltitude
+    Eccentricity = (data['Apogee Altitude[km]'] - data['Perigee Altitude[km]'])/(Mean_Alltitude + Const.Re_V)/2 
 
     # Add column to dataframe
     data['Mean Altitude[km]'] = Mean_Alltitude
+    data['Eccentricity'] = Eccentricity
     full_of_true = np.ones_like(Mean_Alltitude,dtype=bool)
     
     # Set filter for 'COSPARID' 
@@ -431,6 +436,12 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
     else:
         MeanAlt_flag = full_of_true    
 
+    # Set filter for 'Ecc'
+    if Ecc is not None:
+        Ecc_flag = (Eccentricity > Ecc[0]) & (Eccentricity < Ecc[1])
+    else:
+        Ecc_flag = full_of_true       
+
     # Set filter for 'Country'
     if Country is not None:
         if type(Country) in [str,list]:
@@ -441,12 +452,12 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
         Country_flag = full_of_true    
 
     # Combine filters
-    combined_flag = COSPARID_flag & NORADID_flag & Payload_flag & Decayed_flag & DecayDate_flag & OrbitalPeriod_flag & Inclination_flag & ApoAlt_flag & PerAlt_flag & MeanAlt_flag & Country_flag
+    combined_flag = COSPARID_flag & NORADID_flag & Payload_flag & Decayed_flag & DecayDate_flag & OrbitalPeriod_flag & Inclination_flag & ApoAlt_flag & PerAlt_flag & MeanAlt_flag & Ecc_flag & Country_flag
     df = data[combined_flag]
 
     # Eeadjust the order of the columns 
     column_reorder = ['COSPARID', 'NORADID', 'Satellite Name','Multiple Name Flag','Payload Flag','Operational Status Code','Decay Date',\
-                      'Orbital Period[min]', 'Inclination[deg]','Apogee Altitude[km]','Perigee Altitude[km]','Mean Altitude[km]',\
+                      'Orbital Period[min]', 'Inclination[deg]','Apogee Altitude[km]','Perigee Altitude[km]','Mean Altitude[km]','Eccentricity',\
                       'Launch Date','Launch Site','Radar Cross Section[m2]','Country','Orbital Status Code']
     df = df.reindex(columns=column_reorder)
             
@@ -475,6 +486,8 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
             df = df.sort_values(by=['Perigee Altitude[km]'],ascending=ascending_flag) 
         elif sort.__contains__('MeanAlt'):
             df = df.sort_values(by=['Mean Altitude[km]'],ascending=ascending_flag) 
+        elif sort.__contains__('Ecc'):
+            df = df.sort_values(by=['Eccentricity'],ascending=ascending_flag)     
         elif sort.__contains__('LaunchDate'):
             df = df.sort_values(by=['Launch Date'],ascending=ascending_flag) 
         elif sort.__contains__('LaunchSite'):
@@ -484,12 +497,12 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
         elif sort.__contains__('Country'):
             df = df.sort_values(by=['Country'],ascending=ascending_flag)
         else:
-            raise Exception("Avaliable options include 'COSPARID', NORADID', 'DecayDate', 'OrbitalPeriod', 'Inclination', 'ApoAlt', 'PerAlt', 'MeanAlt', 'LaunchDate', 'LaunchSite', 'RCS', and 'Country'. Also, a negative sign '-' can be added ahead to the option to sort in descending order.")
+            raise Exception("Avaliable options include 'COSPARID', NORADID', 'DecayDate', 'OrbitalPeriod', 'Inclination', 'ApoAlt', 'PerAlt', 'MeanAlt', 'Ecc', 'LaunchDate', 'LaunchSite', 'RCS', and 'Country'. Also, a negative sign '-' can be added ahead to the option to sort in descending order.")
     df = df.reset_index(drop=True)
     if outfile: df.to_csv('celestrak_catalog.csv') # Save the pandas dataframe to a csv-formatted file
     return df
 
-def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=None,Shape=None,Decayed=None,DecayDate=None,OrbitalPeriod=None,Inclination=None,ApoAlt=None,PerAlt=None,MeanAlt=None,Length=None,Height=None,Depth=None,RCSMin=None,RCSMax=None,RCSAvg=None,Country=None,sort=None,outfile=True):
+def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=None,Shape=None,Decayed=None,DecayDate=None,OrbitalPeriod=None,Inclination=None,ApoAlt=None,PerAlt=None,MeanAlt=None,Ecc=None,Length=None,Height=None,Depth=None,RCSMin=None,RCSMax=None,RCSAvg=None,Country=None,sort=None,outfile=True):
     """
     Query space targets that meet the requirements by setting a series of specific parameters from the the [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) database and the [CELESTRAK](https://celestrak.com) database.
 
@@ -510,7 +523,8 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
     Inclination -> [list of float with 2 elemnts, optional, default = None] Orbit inclination[degrees] of targets; must be in form of [inc1,inc2], such as [45.0,80.0]; if None, this option is ignored.  
     ApoAlt        -> [list of float with 2 elemnts, optional, default = None] Apogee Altitude[km] of targets; it must be in form of [apoalt1,apoalt2], such as [800.0,1400.0]; if None, this option is ignored.  
     PerAlt        -> [list of float with 2 elemnts, optional, default = None] Perigee Altitude[km] of targets; it must be in form of [peralt1,peralt2], such as [300.0,400.0]; if None, this option is ignored.  
-    MeanAlt       -> [list of float with 2 elemnts, optional, default = None] Mean Altitude[km] of targets; it must be in form of [meanalt1,meanalt2], such as [300.0,800.0]; if None, then option is ignored.  
+    MeanAlt       -> [list of float with 2 elemnts, optional, default = None] Mean Altitude[km] of targets; it must be in form of [meanalt1,meanalt2], such as [300.0,800.0]; if None, then option is ignored. 
+    Ecc           -> [list of float with 2 elemnts, optional, default = None] Eccentricity of targets; it must be in form of [ecc1,ecc2], such as [0.01,0.2]; if None, then option is ignored.   
     Length        -> [list of float with 2 elemnts, optional, default = None] Length[m] of a target; it must be in form of [l1,l2], such as [5.0,10.0]; if None, this option is ignored.
     Height        -> [list of float with 2 elemnts, optional, default = None] Height[m] of a target; it must be in form of [h1,h2], such as [5.0,10.0]; if None, this option is ignored.
     Depth         -> [list of float with 2 elemnts, optional, default = None] Depth[m] of a target; it must be in form of [d1,d2], such as [5.0,10.0]; if None, this option is ignored.
@@ -522,7 +536,7 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
     RCSAvg        -> [list of float with 2 elemnts, optional, default = None] Average Radar Cross Section[m2] of a target; it must be in form of [RCS1,RCS2], such as [5,20]; if None, this option is ignored.
     Country       -> [str or list of str, optional, default = None] Satellite Ownership; country codes/names can be found at http://www.fao.org/countryprofiles/iso3list/en/; if None, this option is ignored.
     sort          -> [str, optional, default = None] sort by features of targets in a specific order, such as by mass; avaliable options include 'COSPARID', NORADID', 'ObjectClass', 'Mass', 'DecayDate', 'Shape', 
-    'Length', 'Height', 'Depth', 'RCSMin', 'RSCMax', 'RCSAvg', 'OrbitalPeriod', 'Inclination', 'ApoAlt', 'PerAlt', 'MeanAlt', and 'Country'.
+    'Length', 'Height', 'Depth', 'RCSMin', 'RSCMax', 'RCSAvg', 'OrbitalPeriod', 'Inclination', 'ApoAlt', 'PerAlt', 'MeanAlt', 'Ecc', and 'Country'.
     If there is a negative sign '-' ahead, such as "-RCSAvg", it will be sorted in descending order. If None, then sort by NORADID by default.
     outfile       -> [bool, optional, default = True] If True, then the file 'celestrak_catalog.csv' is created; if False, no files are generated.
     
@@ -531,7 +545,7 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
     discos_catalog.csv -> [optional] a csv-formatted file that records the pandas dataframe
     """
     # Query space targets from the CELESTRAK database
-    df_celestrak = celestrak_query(COSPARID,NORADID,Payload,Decayed,DecayDate,OrbitalPeriod,Inclination,ApoAlt,PerAlt,MeanAlt,Country,outfile=False).drop('Satellite Name',axis=1)
+    df_celestrak = celestrak_query(COSPARID,NORADID,Payload,Decayed,DecayDate,OrbitalPeriod,Inclination,ApoAlt,PerAlt,MeanAlt,Ecc,Country,outfile=False).drop('Satellite Name',axis=1)
     
     # Query space targets from the DISCOS database
     print('\nGo through the DISCOS database ... ')    
@@ -549,7 +563,7 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
     df = df.drop(['Radar Cross Section[m2]','VimpelId'],axis=1)
     column_reorder = ['COSPARID', 'NORADID', 'Satellite Name','Multiple Name Flag','ObjectClass','Payload Flag','Operational Status Code','Mass[kg]','Shape',\
                       'Length[m]', 'Height[m]','Depth[m]','RCSMin[m2]', 'RCSMax[m2]', 'RCSAvg[m2]',\
-                      'Orbital Period[min]', 'Inclination[deg]','Apogee Altitude[km]', 'Perigee Altitude[km]','Mean Altitude[km]',\
+                      'Orbital Period[min]', 'Inclination[deg]','Apogee Altitude[km]', 'Perigee Altitude[km]','Mean Altitude[km]','Eccentricity',\
                       'Launch Date', 'Decay Date','Launch Site','Country','Orbital Status Code']
     df = df.reindex(columns=column_reorder)  
          
@@ -596,6 +610,8 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
             df = df.sort_values(by=['Perigee Altitude[km]'],ascending=ascending_flag) 
         elif sort.__contains__('MeanAlt'):
             df = df.sort_values(by=['Mean Altitude[km]'],ascending=ascending_flag) 
+        elif sort.__contains__('Ecc'):
+            df = df.sort_values(by=['Eccentricity'],ascending=ascending_flag)     
         elif sort.__contains__('LaunchDate'):
             df = df.sort_values(by=['Launch Date'],ascending=ascending_flag) 
         elif sort.__contains__('LaunchSite'):
@@ -603,7 +619,7 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
         elif sort.__contains__('Country'):
             df = df.sort_values(by=['Country'],ascending=ascending_flag)
         else:
-            raise Exception("Avaliable options include 'COSPARID', NORADID', 'DecayDate', 'OrbitalPeriod', 'Inclination', 'ApoAlt', 'PerAlt', 'MeanAlt', 'LaunchDate', 'LaunchSite', 'RCS', and 'Country'. Also, a negative sign '-' can be added to the option to sort in descending order.")
+            raise Exception("Avaliable options include 'COSPARID', NORADID', 'DecayDate', 'OrbitalPeriod', 'Inclination', 'ApoAlt', 'PerAlt', 'MeanAlt', 'Ecc', 'LaunchDate', 'LaunchSite', 'RCS', and 'Country'. Also, a negative sign '-' can be added to the option to sort in descending order.")
     df = df.reset_index(drop=True)
     if outfile: df.to_csv('target_catalog.csv') # Save the pandas dataframe to a csv-formatted file
     return df                
