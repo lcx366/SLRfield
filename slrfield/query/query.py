@@ -6,10 +6,10 @@ import requests
 from datetime import datetime,timedelta
 from time import sleep
 from colorama import Fore
+from zipfile import ZipFile
 
 from ..utils.try_download import tqdm_request
 from ..utils import Const
-
 
 def discos_buildin_filter(params,expr):
     """
@@ -502,6 +502,54 @@ def celestrak_query(COSPARID=None,NORADID=None,Payload=None,Decayed=None,DecayDa
     if outfile: df.to_csv('celestrak_catalog.csv') # Save the pandas dataframe to a csv-formatted file
     return df
 
+def download_qsmag():
+    '''
+    Download or update the file which records the standard(intrinsic) magnitude for satellites from https://www.prismnet.com/~mmccants/programs/qsmag.zip
+    
+    Usage: 
+    qsfile = download_qsmag()
+    
+    Outputs: 
+    qsfile -> [str] Local path of the qs.mag file
+    '''
+    home = str(Path.home())
+    direc = home + '/src/satcat-data/'
+    
+    qsfile_zip = direc + 'qsmag.zip'
+    qsfile = direc + 'qs.mag'
+    url = 'https://www.prismnet.com/~mmccants/programs/qsmag.zip'
+
+    if not path.exists(direc): makedirs(direc)
+    if not path.exists(qsfile):
+        desc = 'Downloading the latest qs.mag data from the Mike McCants Satellite Tracking Web Pages'
+        tqdm_request(url,direc,'qsmag.zip',desc)
+    else:
+        modified_time = datetime.fromtimestamp(path.getmtime(qsfile))
+        if datetime.now() > modified_time + timedelta(days=180):
+            remove(qsfile)
+            desc = 'Updating the qs.mag data from the Mike McCants Satellite Tracking Web Pages'
+            tqdm_request(url,direc,'qsmag.zip',desc)  
+        else:
+            print('The qs.mag data in {:s} is already the latest.'.format(direc))    
+
+    if path.exists(qsfile_zip):
+        # unzip qsmag file
+        with ZipFile(qsfile_zip, 'r') as zip_ref:
+            zip_ref.extractall(direc)
+        remove(qsfile_zip)    
+
+    return qsfile
+
+def parseQSMagFile():
+    '''
+    Read and parse the qs.mag file for getting noradid and standard(intrinsic) magnitude for satellites.
+    '''
+    qsfile = download_qsmag()
+
+    qsmag = np.genfromtxt(qsfile,skip_header=1,skip_footer=1,delimiter=[5,28,5],dtype=(int,str,float)) 
+    df_qsmag = pd.DataFrame(qsmag).drop(columns=['f1']).rename(columns={"f0": "NORADID", "f2": "StdMag"})
+    return df_qsmag         
+
 def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=None,Shape=None,Decayed=None,DecayDate=None,OrbitalPeriod=None,Inclination=None,ApoAlt=None,PerAlt=None,MeanAlt=None,Ecc=None,Length=None,Height=None,Depth=None,RCSMin=None,RCSMax=None,RCSAvg=None,Country=None,sort=None,outfile=True):
     """
     Query space targets that meet the requirements by setting a series of specific parameters from the the [DISCOS](https://discosweb.esoc.esa.int)(Database and Information System Characterising Objects in Space) database and the [CELESTRAK](https://celestrak.com) database.
@@ -548,22 +596,21 @@ def target_query(COSPARID=None,NORADID=None,Payload=None,ObjectClass=None,Mass=N
     df_celestrak = celestrak_query(COSPARID,NORADID,Payload,Decayed,DecayDate,OrbitalPeriod,Inclination,ApoAlt,PerAlt,MeanAlt,Ecc,Country,outfile=False).drop('Satellite Name',axis=1)
     
     # Query space targets from the DISCOS database
-    print('\nGo through the DISCOS database ... ')    
+    print('Go through the DISCOS database ... ')    
     df_discos = discos_query(COSPARID,NORADID,ObjectClass,Payload,Decayed,DecayDate,Mass,Shape,Length,Height,Depth,RCSMin,RCSMax,RCSAvg,outfile=False).dropna(subset=['NORADID'])
     
-    # Take the intersection of CELESTRAK and DISCOS
-    nid,nid_celestrak,nid_discos = np.intersect1d(df_celestrak['NORADID'],df_discos['NORADID'],assume_unique=True,return_indices=True)
-    df_celestrak = df_celestrak.iloc[nid_celestrak]
-    df_discos = df_discos.iloc[nid_discos]
-    
-    # Merge pandas dataframes
+    # Merge the CELESTRAK database and the DISCOS database
     df = pd.merge(df_celestrak, df_discos, on=['COSPARID','NORADID'],validate="one_to_one")
+
+    # Merge the QSMAG database
+    df_qsmag = parseQSMagFile()
+    df = pd.merge(df, df_qsmag, on=['NORADID'],how='left',validate="one_to_one")
 
     # Remove unwanted columns and readjust the order of the columns 
     df = df.drop(['Radar Cross Section[m2]','VimpelId'],axis=1)
     column_reorder = ['COSPARID', 'NORADID', 'Satellite Name','Multiple Name Flag','ObjectClass','Payload Flag','Operational Status Code','Mass[kg]','Shape',\
                       'Length[m]', 'Height[m]','Depth[m]','RCSMin[m2]', 'RCSMax[m2]', 'RCSAvg[m2]',\
-                      'Orbital Period[min]', 'Inclination[deg]','Apogee Altitude[km]', 'Perigee Altitude[km]','Mean Altitude[km]','Eccentricity',\
+                      'Orbital Period[min]', 'Inclination[deg]','Apogee Altitude[km]', 'Perigee Altitude[km]','Mean Altitude[km]','Eccentricity','StdMag',\
                       'Launch Date', 'Decay Date','Launch Site','Country','Orbital Status Code']
     df = df.reindex(columns=column_reorder)  
          
