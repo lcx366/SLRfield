@@ -211,6 +211,8 @@ csv-formatted file *VisiblePasses_bysat.csv* and *VisiblePasses_bydate.csv*, as 
   - Fixed the problem of response failure caused by accessing a large amount of data from discos remote server using API
   - Fixed the problem that requested URL's length exceeds the capacity limit of the space-track server.
   - Change the process printing style of query from static to dynamic with color
+  - Added support for orbital eccentricity in celestrak_query and target_query, including options of filtering and sorting
+  - Added support for output of standard(intrinsic) magnitudes of targets in target_query
 
 - **0.1.14 — Jun 18,  2021**
 
