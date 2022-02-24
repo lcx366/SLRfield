@@ -4,31 +4,32 @@ from ftplib import FTP
 import requests
 from bs4 import BeautifulSoup
 from astropy.time import Time
+from warnings import warn
 
-from ..utils.try_download import tqdm_ftp,tqdm_request
+from ..utils.try_download import tqdm_ftp,tqdm_request_cpf
 
-def download_bycurrent(source,satnames,append=False):
+def download_bycurrent(source,satnames=None,keep=True):
     """
     Download the latest CPF ephemeris files at the current moment.
 
     Usage: 
-    server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent('CDDIS')
-    server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent('EDC')
-    server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent('CDDIS',lageos1')
-    server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent('EDC',['ajisai','lageos1','hy2a'])
+        server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent('CDDIS')
+        server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent('EDC')
+        server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent('CDDIS',lageos1')
+        server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent('EDC',['ajisai','lageos1','hy2a'])
 
     Inputs:
-    source       -> [str] source for CPF ephemeris files. Currently, only 'CDDIS' and 'EDC' are available.
-    satnames     -> [str, str list, or None] target name or list of target names. If None, then all feasible targets at the current moment will be downloaded.
+        source -> [str] source for CPF ephemeris files. Currently, only 'CDDIS' and 'EDC' are available.
     
     Parameters:
-    append       -> [Bool, default = False] If False, clear the data storage directory ahead of requesting CPF files. If True, then keep the data storage directory.
+        satnames -> [str, list of str, default=None] target name or list of target names. If None, then all feasible targets at the current moment will be downloaded.
+        keep -> [Bool, default = True] If False, clear the data storage directory ahead of requesting CPF files. If True, then keep the data in storage directory.
 
     Outputs:
-    server       -> [str] server for downloading CPF ephemeris files. Currently, only 'cddis.nasa.gov' and 'edc.dgfi.tum.de' are available.
-    dir_cpf_from -> [str] directory for storing CPF ephemeris files in remote server.
-    dir_cpf_to   -> [str] user's local directory for storing CPF ephemeris files
-    cpf_files    -> [str list] list of CPF ephemeris files
+        server -> [str] server for downloading CPF ephemeris files. Currently, only 'cddis.nasa.gov' and 'edc.dgfi.tum.de' are available.
+        dir_cpf_from -> [str] directory for storing CPF ephemeris files in remote server.
+        dir_cpf_to -> [str] user's local directory for storing CPF ephemeris files
+        cpf_files -> [str list] list of CPF ephemeris files
     """ 
     cpf_files = []
     date = Time.now().iso
@@ -37,7 +38,7 @@ def download_bycurrent(source,satnames,append=False):
     if not path.exists(dir_cpf_to): 
         makedirs(dir_cpf_to)   
     else:
-        if not append: system('rm -rf %s/*' % dir_cpf_to)
+        if not keep: system('rm -rf %s/*' % dir_cpf_to)
         
     if source == 'CDDIS':
         server = 'https://cddis.nasa.gov'
@@ -75,27 +76,27 @@ def download_bycurrent(source,satnames,append=False):
       
     return server,dir_cpf_from, dir_cpf_to,cpf_files                   
 
-def download_bydate(source,date,satnames,append=False): 
+def download_bydate(source,date,satnames,keep=True): 
     """
     Download the latest CPF ephemeris files before a specific time.
 
     Usage: 
-    server,dirs_cpf_from, dir_cpf_to,cpf_files = download_bydate('CDDIS','2007-06-01 11:30:00',['ajisai','lageos1','hy2a'])
-    server,dirs_cpf_from, dir_cpf_to,cpf_files = download_bycurrent('EDC','2017-12-20 05:30:00','hy2a'])
+        server,dirs_cpf_from, dir_cpf_to,cpf_files = download_bydate('CDDIS','2007-06-01 11:30:00',['ajisai','lageos1','hy2a'])
+        server,dirs_cpf_from, dir_cpf_to,cpf_files = download_bycurrent('EDC','2017-12-20 05:30:00','hy2a'])
 
     Inputs:
-    source       -> [str] source for CPF ephemeris files. Currently, only 'CDDIS' and 'EDC' are available.
-    date         -> [str] 'iso-formatted' time, such as '2017-12-20 05:30:00'. It specifies a moment before which the latest CPF ephemeris files are downloaded.
-    satnames     -> [str, str list] target name or list of target names. 
+        source -> [str] source for CPF ephemeris files. Currently, only 'CDDIS' and 'EDC' are available.
+        date -> [str] 'iso-formatted' time, such as '2017-12-20 05:30:00'. It specifies a moment before which the latest CPF ephemeris files are downloaded.
+        satnames -> [str, str list] target name or list of target names. 
     
     Parameters:
-    append       -> [Bool, default = False] If False, clear the data storage directory ahead of requesting CPF files. If True, then keep the data storage directory.
+        keep -> [Bool, default = True] If False, clear the data storage directory ahead of requesting CPF files. If True, then keep the data storage directory.
 
     Outputs:
-    server       -> [str] server for downloading CPF ephemeris files. Currently, only 'cddis.nasa.gov' and 'edc.dgfi.tum.de' are available.
-    dir_cpf_from -> [str] directory for storing CPF ephemeris files in remote server.
-    dir_cpf_to   -> [str] user's local directory for storing CPF ephemeris files
-    cpf_files    -> [str list] list of CPF ephemeris files
+        server -> [str] server for downloading CPF ephemeris files. Currently, only 'cddis.nasa.gov' and 'edc.dgfi.tum.de' are available.
+        dir_cpf_from -> [str] directory for storing CPF ephemeris files in remote server.
+        dir_cpf_to -> [str] user's local directory for storing CPF ephemeris files
+        cpf_files -> [str list] list of CPF ephemeris files
     """   
     if satnames is None:
         raise Exception("satnames must be provided.")      
@@ -116,7 +117,7 @@ def download_bydate(source,date,satnames,append=False):
     if not path.exists(dir_cpf_to): 
         makedirs(dir_cpf_to)   
     else:
-        if not append: system('rm -rf %s/*' % dir_cpf_to)
+        if not keep: system('rm -rf %s/*' % dir_cpf_to)
         
     if source == 'CDDIS':
         server = 'https://cddis.nasa.gov'   
@@ -217,30 +218,30 @@ def download_bydate(source,date,satnames,append=False):
     else:    
         raise Exception("Currently, CPF predictions only from 'CDDIS' and 'EDC' are available.")     
             
-    return server,dirs_cpf_from, dir_cpf_to,cpf_files
+    return server,dirs_cpf_from,dir_cpf_to,cpf_files
 
-def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',append=False):
+def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',keep=True):
     """
     Download the latest CPF ephemeris files.
 
     Usage: 
-    dir_cpf_files = cpf_download()
-    dir_cpf_files = cpf_download(source = 'EDC')
-    dir_cpf_files = cpf_download('lageos1')
-    dir_cpf_files = cpf_download('ajisai','2007-06-01 11:30:00')
-    dir_cpf_files = cpf_download(['ajisai','lageos1','hy2a'],'2007-06-01 11:30:00','EDC')
+        dir_cpf_files = cpf_download()
+        dir_cpf_files = cpf_download(source = 'EDC')
+        dir_cpf_files = cpf_download('lageos1')
+        dir_cpf_files = cpf_download('ajisai','2007-06-01 11:30:00')
+        dir_cpf_files = cpf_download(['ajisai','lageos1','hy2a'],'2007-06-01 11:30:00','EDC')
 
     Parameters:
-    satnames          -> [str, str list, or None, default = None] target name or list of target names. If None, then all feasible targets at the current moment will be downloaded. In this case, 'date' must also be None. 
-    date              -> [str or None, default = None] 'iso-formatted' time, such as '2017-12-20 05:30:00'. It specifies a moment before which the latest CPF ephemeris files are downloaded. If None, then all feasible targets or targets in list at the current moment will be downloaded.
-    source            -> [str, default = 'CDDIS'] source for CPF ephemeris files. Currently, only 'CDDIS' and 'EDC' are available.
-    append            -> [Bool, default = False] If False, clear the data storage directory ahead of requesting CPF files. If True, then keep the data storage directory.
+        satnames -> [str, str list, default = None] target name or list of target names. If None, then all feasible targets at the current moment will be downloaded. In this case, 'date' must also be None. 
+        date -> [str, default = None] 'iso-formatted' time, such as '2017-12-20 05:30:00'. It specifies a moment before which the latest CPF ephemeris files are downloaded. If None, then all feasible targets or targets in list at the current moment will be downloaded.
+        source -> [str, default = 'CDDIS'] source for CPF ephemeris files. Currently, only 'CDDIS' and 'EDC' are available.
+        keep -> [Bool, default = True] If False, clear the data storage directory ahead of requesting CPF files. If True, then keep the data in storage directory.
     
     Outputs:
-    dir_cpf_files     -> [str list] list of paths for CPF ephemeris files in user's local directory
-    missing_cpf_files -> [str list or None] if not None, it lists files that are not responsed from the server
+        dir_cpf_files -> [str list] list of paths for CPF ephemeris files in user's local directory
+        missing_cpf_files -> [str list or None] if not None, it lists files that are not responsed from the server
 
-    Note: if 'date' is provided, namely not None, then 'satnames' must also be provided.
+    Note: if 'date' is provided, then 'satnames' must be provided.
     """
     if source == 'CDDIS': # Need to create an Earthdata login account at https://urs.earthdata.nasa.gov/ 
         # Create a .netrc file in the home directory
@@ -252,20 +253,18 @@ def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',append=False
             netrc_file.write('machine urs.earthdata.nasa.gov login '+uid+' password '+passwd)
             netrc_file.close()
 
-    dir_cpf_files,missing_cpf_files = [],[]
+    missing_cpf_files = []
     
     if date is None:
-        server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent(source,satnames,append)  
+        server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent(source,satnames,keep)  
 
         if source == 'CDDIS':
             for cpf_file in cpf_files:
                 url = server+dir_cpf_from+cpf_file
                 desc = 'Downloading {:s}'.format(cpf_file)
-                missing_cpf_file = tqdm_request(url,dir_cpf_to,cpf_file,desc)
+                missing_cpf_file = tqdm_request_cpf(url,dir_cpf_to,cpf_file,desc)
                 if missing_cpf_file is not None: missing_cpf_files.append(missing_cpf_file)
-                dir_cpf_files.append(dir_cpf_to+cpf_file)
                 
-
         if source == 'EDC':
             ftp = FTP(server,timeout=200)    
             ftp.login()  
@@ -274,21 +273,19 @@ def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',append=False
                 desc = 'Downloading {:s}'.format(cpf_file)
                 missing_cpf_file = tqdm_ftp(ftp,dir_cpf_to,cpf_file,desc)
                 if missing_cpf_file is not None: missing_cpf_files.append(missing_cpf_file)
-                dir_cpf_files.append(dir_cpf_to+cpf_file)
 
             ftp.quit()  
             ftp.close()    
                 
     else:    
-        server,dirs_cpf_from, dir_cpf_to,cpf_files = download_bydate(source,date,satnames,append)  
+        server,dirs_cpf_from, dir_cpf_to,cpf_files = download_bydate(source,date,satnames,keep)  
 
         if source == 'CDDIS':
             for dir_cpf_from,cpf_file in zip(dirs_cpf_from,cpf_files):
                 url = server+dir_cpf_from+cpf_file
                 desc = 'Downloading {:s}'.format(cpf_file)
-                missing_cpf_file = tqdm_request(url,dir_cpf_to,cpf_file,desc)
+                missing_cpf_file = tqdm_request_cpf(url,dir_cpf_to,cpf_file,desc)
                 if missing_cpf_file is not None: missing_cpf_files.append(missing_cpf_file)
-                dir_cpf_files.append(dir_cpf_to+cpf_file)
 
         if source == 'EDC': 
             ftp = FTP(server,timeout=200)    
@@ -299,43 +296,40 @@ def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',append=False
                 desc = 'Downloading {:s}'.format(cpf_file)
                 missing_cpf_file = tqdm_ftp(ftp,dir_cpf_to,cpf_file,desc)
                 if missing_cpf_file is not None: missing_cpf_files.append(missing_cpf_file)
-                dir_cpf_files.append(dir_cpf_to+cpf_file)
 
             ftp.quit()  
             ftp.close()    
-                           
 
-    return dir_cpf_files,missing_cpf_files
-    
-    
-def cpf_download(satnames = None,date = None,source = 'CDDIS',append=False):
+    return dir_cpf_to,cpf_files,missing_cpf_files
+        
+def cpf_download(satnames = None,date = None,source = 'CDDIS',keep=True):
     """
     Download the latest CPF ephemeris files.
 
     Usage: 
-    dir_cpf_files = cpf_download()
-    dir_cpf_files = cpf_download(source = 'EDC')
-    dir_cpf_files = cpf_download('lageos1')
-    dir_cpf_files = cpf_download('ajisai','2007-06-01 11:30:00')
-    dir_cpf_files = cpf_download(['ajisai','lageos1','hy2a'],'2007-06-01 11:30:00','EDC')
+        dir_cpf_files = cpf_download()
+        dir_cpf_files = cpf_download(source = 'EDC')
+        dir_cpf_files = cpf_download('lageos1')
+        dir_cpf_files = cpf_download('ajisai','2007-06-01 11:30:00')
+        dir_cpf_files = cpf_download(['ajisai','lageos1','hy2a'],'2007-06-01 11:30:00','EDC')
 
     Parameters:
-    satnames      -> [str, str list, or None, default = None] target name or list of target names. If None, then all feasible targets at the current moment will be downloaded. In this case, 'date' must also be None. 
-    date          -> [str or None, default = None] 'iso-formatted' time, such as '2017-12-20 05:30:00'. It specifies a moment before which the latest CPF ephemeris files are downloaded. If None, then all feasible targets or targets in list at the current moment will be downloaded.
-    source        -> [str, default = 'CDDIS'] source for CPF ephemeris files. Currently, only 'CDDIS' and 'EDC' are available.
-    append        -> [Bool, default = False] If False, clear the data storage directory ahead of requesting CPF files. If True, then keep the data storage directory.
+        satnames -> [str, str list, default = None] target name or list of target names. If None, then all feasible targets at the current moment will be downloaded. In this case, 'date' must also be None. 
+        date -> [str, default = None] 'iso-formatted' time, such as '2017-12-20 05:30:00'. It specifies a moment before which the latest CPF ephemeris files are downloaded. If None, then all feasible targets or targets in list at the current moment will be downloaded.
+        source -> [str, default = 'CDDIS'] source for CPF ephemeris files. Currently, only 'CDDIS' and 'EDC' are available.
+        keep -> [Bool, default = True] If False, clear the data storage directory ahead of requesting CPF files. If True, then keep the data in storage directory.
     
     Outputs:
-    dir_cpf_files -> [str list] list of paths for CPF ephemeris files in user's local directory
+        dir_cpf_to -> [str] paths for storing CPF files
+        cpf_files -> [list of str] list of CPF ephemeris files in CPF directory
 
-    Note: if 'date' is provided, namely not None, then 'satnames' must also be provided.
+    Note: if 'date' is provided, then 'satnames' must also be provided.
     """  
-    cpf_files_downloaded, cpf_files_missed = cpf_download_prior(satnames,date,source,append)
+    dir_cpf_to, cpf_files, cpf_files_missed = cpf_download_prior(satnames,date,source,keep)
     
-    if cpf_files_missed:
-        cpf_files_downloaded2, cpf_files_missed2 = cpf_download_prior(cpf_files_missed,append=True)
-        cpf_files_downloaded += cpf_files_downloaded2
-    return cpf_files_downloaded    
+    if cpf_files_missed: warn('The following cpf files are faild to download:',cpf_files_missed)   
+
+    return dir_cpf_to, cpf_files    
 
 def get_cpf_filelist(server,dir_cpf_from,mode):    
     """
@@ -365,4 +359,23 @@ def get_cpf_filelist(server,dir_cpf_from,mode):
     cpf_files_list = [ele[0] for ele in cpf_files_turple]
 
     res.close()
-    return cpf_files_dict, cpf_files_list   
+    return cpf_files_dict, cpf_files_list  
+
+def get_cpf_satlist(source = 'CDDIS'):
+    """
+    Generate the CPF satellite list sorted by date from the latest to the oldest.
+    """
+    if source == 'CDDIS': # Need to create an Earthdata login account at https://urs.earthdata.nasa.gov/ 
+        # Create a .netrc file in the home directory
+        home = str(Path.home())
+        if not path.exists(home+'/.netrc'):
+            uid = input('Please input the Username for your EARTHDATA login account(which can be created at https://urs.earthdata.nasa.gov/): ')
+            passwd = input('Please input the Password: ')
+            netrc_file = open(home+'/.netrc','w')
+            netrc_file.write('machine urs.earthdata.nasa.gov login '+uid+' password '+passwd)
+            netrc_file.close()
+    
+    server,dir_cpf_from, dir_cpf_to,cpf_files = download_bycurrent(source)  
+    cpf_satlist = [cpf_file.split('_cpf')[0] for cpf_file in cpf_files]  
+                           
+    return cpf_satlist

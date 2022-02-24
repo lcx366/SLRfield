@@ -1,28 +1,27 @@
 import numpy as np
 from astropy.time import Time,TimeDelta
 
-from ..slrclasses.cpfpred import CPFdata
-
-def read_cpf(cpf_file):
+def read_cpf(cpf_dir,cpf_file):
     """
     Parse a single CPF ephemeris file and read the data.
 
     Usage: 
-    data = read_cpf(cpf_file)
+        data = read_cpf(cpf_dir,cpf_file)
 
     Inputs:
-    cpf_file -> [str] the name of CPF ephemeris file, such as 'ajisai_cpf_170829_7411.hts'
+        cpf_dir -> [str] Directory for storing CPF ephemeris files
+        cpf_file -> [str] name of the CPF ephemeris file, such as 'ajisai_cpf_170829_7411.hts'
 
     Outputs:
-    data     -> [dictionary] a python dictionary containing the main information of the CPF ephemeris file. 
-    The information includes the following contents:
-    (1) Format; (2) Format Version (3) Ephemeris Source (4) date of ephemeris production (5) Ephemeris Sequence number
-    (6) Target name (7) COSPAR ID (8) SIC (9) NORAD ID (10) Starting date and time (11) Ending date and time
-    (12) Time between table entries (UTC seconds) (13) Target type (14) Reference frame (15) Rotational angle type
-    (16) Center of mass correction (17) Direction type (18) Modified Julian Date (19) Seconds of Day (20) Leap_Second
-    (21) time in UTC (22) target positions in meters
+        data -> [dictionary] a python dictionary containing the main information of the CPF ephemeris file. 
+        The information includes the following contents:
+        (1) Format; (2) Format Version (3) Ephemeris Source (4) date of ephemeris production (5) Ephemeris Sequence number
+        (6) Target name (7) COSPAR ID (8) SIC (9) NORAD ID (10) Starting date and time (11) Ending date and time
+        (12) Time between table entries (UTC seconds) (13) Target type (14) Reference frame (15) Rotational angle type
+        (16) Center of mass correction (17) Direction type (18) Modified Julian Date (19) Seconds of Day (20) Leap_Second
+        (21) time in UTC (22) target positions in meters
     """
-    cpf_data = open(cpf_file,'r').readlines()
+    cpf_data = open(cpf_dir+cpf_file,'r').readlines()
     data = {'MJD':[],'SoD':[],'positions[m]':[],'Leap_Second':[]}
     for line in cpf_data:
         info = line.split()
@@ -106,26 +105,3 @@ def read_cpf(cpf_file):
     data['ts_utc'] = (Time(data['MJD'],format = 'mjd') + TimeDelta(data['SoD'],format='sec')).iso
 
     return data
-
-def read_cpfs(cpf_files):
-    """
-    Parse a single CPF ephemeris file of a set of CPF ephemeris files and read the data.
-
-    Usage: 
-    cpf_data = read_cpfs(cpf_files)
-
-    Inputs:
-    cpf_files -> [str] name of CPF ephemeris file, such as 'ajisai_cpf_170829_7411.hts'; 
-    or list of filenames, such as ['CPF/EDC/2016-12-31/starlette_cpf_161231_8661.sgf','CPF/CDDIS/2020-04-15/lageos1_cpf_200415_6061.jax']
-
-    Outputs:
-    cpf_data  -> [object] instance of class CPFdata
-    """
-    data = []
-
-    if type(cpf_files) is str: cpf_files = [cpf_files]
-
-    for cpf_file in cpf_files:
-        data.append(read_cpf(cpf_file))
-
-    return CPFdata(data)     

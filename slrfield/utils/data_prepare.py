@@ -1,11 +1,11 @@
-from skyfield.api import Loader
-from .data_download import download_eop,download_ephem
+from astropy.utils import iers as iers_astropy
+from .data_download import download_eop
 
-dir_eop = download_eop()
-dir_eph = download_ephem('de440')
-    
-load_eop = Loader(dir_eop)
-load_eph = Loader(dir_eph)
+def time_load():
 
-ts = load_eop.timescale()
-planets = load_eph('de440.bsp')
+    # load the EOP file
+    eop_file = download_eop()
+
+    # for astropy
+    iers_a = iers_astropy.IERS_A.open(eop_file)
+    eop_table = iers_astropy.earth_orientation_table.set(iers_a)

@@ -31,14 +31,13 @@ def tqdm_ftp(ftp,dir_to,file,desc):
             pbar.close()
             local_file.close()       
 
-
-def tqdm_request(url,dir_cpf_to,cpf_file,desc):
+def tqdm_request_cpf(url,dir_cpf_to,cpf_file,desc):
     """
-    Try to download files from url with a colored progress bar.
+    Try to download cpf files from url with a colored progress bar.
     """
     block_size = 1024*10
-    bar_format = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
     missing_flag = False
+    bar_format = "{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)
     for idownload in range(5):
         try:
             local_file = open(dir_cpf_to + cpf_file, 'wb')

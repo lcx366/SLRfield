@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='slrfield',
-    version='0.1.17',
+    version='0.2.0',
     description='A package to handle the SLR(Satellite Laser Ranging) data',
     author='Chunxiao Li',
     author_email='lcx366@126.com',
@@ -10,7 +10,7 @@ setup(
     license='MIT',
     long_description_content_type='text/markdown',
     long_description=open('README.md', 'rb').read().decode('utf-8'),
-    keywords = ['SLR','CPF','TLE','DISCOS','CelsTrak','space-track'],
+    keywords = ['SLR','CPF'],
     python_requires = '>=3.8',
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -25,9 +25,6 @@ setup(
     install_requires=[
         'scipy',
         'numpy>=1.21.2',
-        'pandas>=1.3.4',
-        'spacetrack',
-        'skyfield>=1.39',
         'astropy>=4.3.1',
         'tqdm',
         'colorama',
