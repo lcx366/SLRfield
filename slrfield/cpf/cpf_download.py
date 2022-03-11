@@ -47,7 +47,7 @@ def download_bycurrent(source,satnames=None,keep=True):
            
     elif source == 'EDC':
         server = 'edc.dgfi.tum.de'
-        dir_cpf_from = '~/slr/cpf_predicts//current/'
+        dir_cpf_from = '~/slr/cpf_predicts_v2/current/'
         ftp = FTP(server,timeout=200)
         ftp.login()
         ftp.cwd(dir_cpf_from)
