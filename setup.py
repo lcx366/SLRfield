@@ -28,6 +28,7 @@ setup(
         'astropy>=4.3.1',
         'tqdm',
         'colorama',
-        'beautifulsoup4'
+        'beautifulsoup4',
+        'requests'
         ],
 )
