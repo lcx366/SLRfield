@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from astropy.time import Time
 from warnings import warn
 
-from ..utils.try_download import tqdm_ftp,tqdm_request_cpf
+from ..utils.try_download import tqdm_ftp, tqdm_request_http
 
 def download_bycurrent(source,satnames=None,keep=True):
     """
@@ -42,7 +42,7 @@ def download_bycurrent(source,satnames=None,keep=True):
         
     if source == 'CDDIS':
         server = 'https://cddis.nasa.gov'
-        dir_cpf_from = '/archive/slr/cpf_predicts/current/' 
+        dir_cpf_from = '/archive/slr/cpf_predicts_v2/current/' 
         cpf_files_dict,cpf_files_list = get_cpf_filelist(server,dir_cpf_from,'bycurrent')
            
     elif source == 'EDC':
@@ -262,7 +262,7 @@ def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',keep=True):
             for cpf_file in cpf_files:
                 url = server+dir_cpf_from+cpf_file
                 desc = 'Downloading {:s}'.format(cpf_file)
-                missing_cpf_file = tqdm_request_cpf(url,dir_cpf_to,cpf_file,desc)
+                missing_cpf_file = tqdm_request_http(url,dir_cpf_to,cpf_file,desc)
                 if missing_cpf_file is not None: missing_cpf_files.append(missing_cpf_file)
                 
         if source == 'EDC':
@@ -284,7 +284,7 @@ def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',keep=True):
             for dir_cpf_from,cpf_file in zip(dirs_cpf_from,cpf_files):
                 url = server+dir_cpf_from+cpf_file
                 desc = 'Downloading {:s}'.format(cpf_file)
-                missing_cpf_file = tqdm_request_cpf(url,dir_cpf_to,cpf_file,desc)
+                missing_cpf_file = tqdm_request_http(url,dir_cpf_to,cpf_file,desc)
                 if missing_cpf_file is not None: missing_cpf_files.append(missing_cpf_file)
 
         if source == 'EDC': 
