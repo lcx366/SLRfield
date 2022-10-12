@@ -1,8 +1,8 @@
 from os import remove
-import requests
 from tqdm import tqdm
 from colorama import Fore
 from time import sleep
+import requests
 
 def tqdm_ftp(ftp,dir_to,file,desc):
     """
@@ -31,7 +31,7 @@ def tqdm_ftp(ftp,dir_to,file,desc):
             pbar.close()
             local_file.close()       
 
-def tqdm_request_cpf(url,dir_cpf_to,cpf_file,desc):
+def tqdm_request_http(url,dir_cpf_to,cpf_file,desc):
     """
     Try to download cpf files from url with a colored progress bar.
     """
@@ -43,6 +43,7 @@ def tqdm_request_cpf(url,dir_cpf_to,cpf_file,desc):
             local_file = open(dir_cpf_to + cpf_file, 'wb')
             pos = local_file.tell()
             res = requests.get(url,stream=True,timeout=200,headers={'Accept-Encoding': None,'Range': f'bytes={pos}-'})
+            res.raise_for_status()
             total_size = int(res.headers.get('Content-Length'))
             pbar = tqdm(desc = desc,total=total_size,unit='B',unit_scale=True,bar_format = bar_format,position=0,initial=pos)
             for chunk in res.iter_content(block_size):
@@ -51,16 +52,16 @@ def tqdm_request_cpf(url,dir_cpf_to,cpf_file,desc):
             pbar.close()   
             res.close()  
             break
-        except: 
+        except (requests.HTTPError, requests.ConnectionError, requests.Timeout) as e: 
             sleep(3)
             if idownload == 4:
                 remove(dir_cpf_to + cpf_file)
                 print('No response, skip {:s}'.format(cpf_file)) 
                 missing_flag = True
         finally:    
-            local_file.close() 
-            if missing_flag: 
-                return cpf_file  
-            else:
-                return None      
-                      
+            local_file.close()
+
+    if missing_flag: 
+        return None 
+    else:
+        return cpf_file      
