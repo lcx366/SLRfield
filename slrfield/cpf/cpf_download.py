@@ -47,7 +47,7 @@ def download_bycurrent(source,satnames=None,keep=True):
            
     elif source == 'EDC':
         server = 'edc.dgfi.tum.de'
-        dir_cpf_from = '~/slr/cpf_predicts//current/'
+        dir_cpf_from = '~/slr/cpf_predicts_v2/current/'
         ftp = FTP(server,timeout=200)
         ftp.login()
         ftp.cwd(dir_cpf_from)
@@ -125,7 +125,7 @@ def download_bydate(source,date,satnames,keep=True):
         for satname in reduplicates:
             cpf_files_list_reduced = []
             find_flag = False
-            dir_cpf_from = '/archive/slr/cpf_predicts/' + date_dir + '/' + satname + '/'
+            dir_cpf_from = '/archive/slr/cpf_predicts_v2/' + date_dir + '/' + satname + '/'
             dirs_cpf_from.append(dir_cpf_from)
             cpf_files_dict,cpf_files_list = get_cpf_filelist(server,dir_cpf_from,'bydate') 
 
@@ -149,7 +149,7 @@ def download_bydate(source,date,satnames,keep=True):
             if not find_flag and date_str2[:2]>='05':  
                 cpf_files_list_reduced = []
                 dirs_cpf_from.remove(dir_cpf_from)
-                dir_cpf_from = '/archive/slr/cpf_predicts/' + '20'+date_str2[:2] + '/' + satname + '/'
+                dir_cpf_from = '/archive/slr/cpf_predicts_v2/' + '20'+date_str2[:2] + '/' + satname + '/'
                 dirs_cpf_from.append(dir_cpf_from)
                 cpf_files_dict,cpf_files_list = get_cpf_filelist(server,dir_cpf_from,'bydate')
     
@@ -176,7 +176,7 @@ def download_bydate(source,date,satnames,keep=True):
         for satname in reduplicates:
             cpf_files_list_reduced = []
             find_flag = False
-            dir_cpf_from = '~/slr/cpf_predicts//' + date_dir + '/' + satname + '/'
+            dir_cpf_from = '~/slr/cpf_predicts_v2//' + date_dir + '/' + satname + '/'
             dirs_cpf_from.append(dir_cpf_from)
             ftp.cwd(dir_cpf_from)
             cpf_files_list = ftp.nlst('-t','*cpf*') # list files containing 'cpf' from newest to oldest  
@@ -197,7 +197,7 @@ def download_bydate(source,date,satnames,keep=True):
             if not find_flag and date_str2[:2]>='05':  
                 cpf_files_list_reduced = []
                 dirs_cpf_from.remove(dir_cpf_from)
-                dir_cpf_from = '~/slr/cpf_predicts//' + '20'+date_str2[:2] + '/' + satname + '/'
+                dir_cpf_from = '~/slr/cpf_predicts_v2//' + '20'+date_str2[:2] + '/' + satname + '/'
                 dirs_cpf_from.append(dir_cpf_from)
                 ftp.cwd(dir_cpf_from)
                 cpf_files_list = ftp.nlst('-t','*cpf*') # list files containing 'cpf' from newest to oldest 
