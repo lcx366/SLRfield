@@ -340,10 +340,8 @@ def get_cpf_filelist(server,dir_cpf_from,mode):
 
     # extract time infomation
     time_info = soup.find_all('span')
-    if mode == 'bycurrent':
-        time_list = [ele.get_text().split('  ')[0] for ele in time_info][2:] # Remove two extra items
-    elif mode == 'bydate':
-        time_list = [ele.get_text().split('  ')[0] for ele in time_info]    
+    time_list = [ele.get_text().split('  ')[0] for ele in time_info][2:] # Remove MD5SUMS and SHA512SUMS files
+
     n_time_list = len(time_list)
 
     # extract filename infomation
