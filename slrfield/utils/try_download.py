@@ -33,7 +33,7 @@ def tqdm_ftp(ftp,dir_to,file,desc):
 
 def tqdm_request_http(url,dir_cpf_to,cpf_file,desc):
     """
-    Try to download cpf files from url with a colored progress bar.
+    Try to download CPF or OEP files from url with a colored progress bar.
     """
     block_size = 1024*10
     missing_flag = False
@@ -62,6 +62,6 @@ def tqdm_request_http(url,dir_cpf_to,cpf_file,desc):
             local_file.close()
 
     if missing_flag: 
-        return None 
+        return cpf_file 
     else:
-        return cpf_file      
+        return None      
