@@ -3,7 +3,8 @@ from pathlib import Path
 from ftplib import FTP
 import requests
 from bs4 import BeautifulSoup
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
+from astropy.units import day
 from warnings import warn
 
 from ..utils.try_download import tqdm_ftp, tqdm_request_http
@@ -106,11 +107,11 @@ def download_bydate(source,date,satnames,keep=True):
         reduplicates = satnames
     else:
         raise Exception('Type of satname should be str or list.')     
-    
+
     dirs_cpf_from,cpf_files = [],[]
     date_dir = date[:4]
     date_str1  = Time(date).strftime('%y%m%d')
-    date_str2  = (Time(date)-7).strftime('%y%m%d') # ephemeris updates for some high-orbit satellites may take several days
+    date_str2  = (Time(date)-7*day).strftime('%y%m%d') # ephemeris updates for some high-orbit satellites may take several days
     date_str = Time(date).strftime('%Y%m%d%H%M%S')
     dir_cpf_to = 'CPF/'+source+'/'+ date[:10] + '/'
     
