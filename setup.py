@@ -1,4 +1,4 @@
-from setuptools import setup,find_packages 
+from setuptools import setup, find_packages
 
 setup(
     name='slrfield',
@@ -10,8 +10,8 @@ setup(
     license='MIT',
     long_description_content_type='text/markdown',
     long_description=open('README.md', 'rb').read().decode('utf-8'),
-    keywords = ['SLR','CPF'],
-    python_requires = '>=3.8',
+    keywords=['SLR', 'CPF'],
+    python_requires='>=3.8',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Education',
@@ -20,7 +20,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'License :: OSI Approved :: MIT License',
         ],
-    packages = find_packages(),
+    packages=find_packages(),
     include_package_data=True,
     install_requires=[
         'scipy',
