@@ -30,7 +30,7 @@ If the ephemeris release center is not provided, the CPF ephemeris files are dow
 ```python
 >>> from slrfield import cpf_download
 >>> cpf_dir_cddis,cpf_files_cddis = cpf_download() # From CDDIS by default;
->>> print(cpf_dir,cpf_files)
+>>> print(cpf_dir_cddis,cpf_files_cddis)
 ```
 
 A directory where CPF files are stored, such as *CPF/CDDIS/2020-10-02/*, will be automatically created.
