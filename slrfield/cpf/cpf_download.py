@@ -123,10 +123,15 @@ def download_bydate(source,date,satnames,keep=True):
     if source == 'CDDIS':
         server = 'https://cddis.nasa.gov'   
 
+        if Time(date) < Time('2021-10-01'):
+            base_url = '/archive/slr/cpf_predicts/'
+        else:
+            base_url = '/archive/slr/cpf_predicts_v2/'
+
         for satname in reduplicates:
             cpf_files_list_reduced = []
             find_flag = False
-            dir_cpf_from = '/archive/slr/cpf_predicts_v2/' + date_dir + '/' + satname + '/'
+            dir_cpf_from = base_url + date_dir + '/' + satname + '/'
             dirs_cpf_from.append(dir_cpf_from)
             cpf_files_dict,cpf_files_list = get_cpf_filelist(server,dir_cpf_from,'bydate') 
 
@@ -339,9 +344,18 @@ def get_cpf_filelist(server,dir_cpf_from,mode):
     res = requests.get(server + dir_cpf_from)
     soup = BeautifulSoup(res.text, 'html.parser')
 
+    # Remove MD5SUMS and SHA512SUMS files manually
+    # Done this way as not every directory has the checksum files present
+    item_to_delete = soup.find(id="MD5SUMS")
+    if item_to_delete:
+        item_to_delete.parent.decompose()
+    item_to_delete = soup.find(id="SHA512SUMS")
+    if item_to_delete:
+        item_to_delete.parent.decompose()
+
     # extract time infomation
     time_info = soup.find_all('span')
-    time_list = [ele.get_text().split('  ')[0] for ele in time_info][2:] # Remove MD5SUMS and SHA512SUMS files
+    time_list = [ele.get_text().split('  ')[0] for ele in time_info]
 
     n_time_list = len(time_list)
 
