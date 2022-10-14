@@ -176,13 +176,19 @@ def download_bydate(source,date,satnames,keep=True):
 
     elif source == 'EDC':
         server = 'edc.dgfi.tum.de'    
+
+        if Time(date) < Time('2021-10-01'):
+            base_url = '~/slr/cpf_predicts/'
+        else:
+            base_url = '~/slr/cpf_predicts_v2/'
+
         ftp = FTP(server,timeout=200)    
         ftp.login()    
 
         for satname in reduplicates:
             cpf_files_list_reduced = []
             find_flag = False
-            dir_cpf_from = '~/slr/cpf_predicts_v2//' + date_dir + '/' + satname + '/'
+            dir_cpf_from = base_url + date_dir + '/' + satname + '/'
             dirs_cpf_from.append(dir_cpf_from)
             ftp.cwd(dir_cpf_from)
             cpf_files_list = ftp.nlst('-t','*cpf*') # list files containing 'cpf' from newest to oldest  
