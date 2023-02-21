@@ -45,7 +45,7 @@ def download_eop(out_days=7, dir_to=None):
     else:
         desc = "Downloading the latest EOP '{:s}' from IERS".format(file)
 
-    if tqdm_request_http(url, dir_to, file, desc) is None:
+    if tqdm_request_http(url, dir_to, file, desc) is not None:
         print('SLRfield was unable to import Earth Orientation Parameters '
               + '(EOP) data. It is recommended to try again or to manually'
               + 'download this data (finals.all.iau2000.txt) and place it '
