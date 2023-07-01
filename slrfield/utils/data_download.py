@@ -6,6 +6,23 @@ from ftplib import FTP
 
 from .try_download import tqdm_ftp
 
+# ftp access
+def ftp_access(server,src_dir):
+    """
+    Access the ftp server to download the EOP file.
+
+    Usage: 
+        >>> ftp_access(server,src_dir)
+
+    Parameters: 
+        server -> [str] Server address
+        src_dir -> [str] Directory of the EOP file
+    """
+    ftp = FTP(server)
+    ftp.login()
+    ftp.cwd(src_dir)
+    return ftp
+
 def download_eop(out_days=7,dir_to=None):
     """
     Download or update the Earth Orientation Parameters(EOP) file from IERS
@@ -32,14 +49,14 @@ def download_eop(out_days=7,dir_to=None):
 
     if not path.exists(dir_to): makedirs(dir_to)
     if not path.exists(dir_file):
-        ftp_access(server,src_dir)
+        ftp = ftp_access(server,src_dir)
         desc = "Downloading the latest EOP '{:s}' from IERS".format(file)
         tqdm_ftp(ftp,dir_to,file,desc)
     else:
         modified_time = datetime.fromtimestamp(path.getmtime(dir_file))
         if datetime.now() > modified_time + timedelta(days=out_days):
             remove(dir_file)
-            ftp_access(server,src_dir)
+            ftp = ftp_access(server,src_dir)
             desc = "Updating EOP '{:s}' from IERS".format(file)
             tqdm_ftp(ftp,dir_to,file,desc)
         else:
