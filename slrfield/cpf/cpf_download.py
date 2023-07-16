@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from astropy.time import Time
 from warnings import warn
 
-from ..utils.try_download import tqdm_ftp,tqdm_request_cpf
+from ..utils.try_download import wget_download
 
 def download_bycurrent(source,satnames=None,keep=True):
     """
@@ -260,9 +260,10 @@ def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',keep=True):
 
         if source == 'CDDIS':
             for cpf_file in cpf_files:
+                dir_cpf_file = dir_cpf_to + cpf_file
                 url = server+dir_cpf_from+cpf_file
                 desc = 'Downloading {:s}'.format(cpf_file)
-                missing_cpf_file = tqdm_request_cpf(url,dir_cpf_to,cpf_file,desc)
+                missing_cpf_file = wget_download(url,dir_cpf_file,desc)
                 if missing_cpf_file is not None: missing_cpf_files.append(missing_cpf_file)
                 
         if source == 'EDC':
@@ -270,8 +271,9 @@ def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',keep=True):
             ftp.login()  
             ftp.cwd(dir_cpf_from) 
             for cpf_file in cpf_files:
+                dir_cpf_file = dir_cpf_to + cpf_file
                 desc = 'Downloading {:s}'.format(cpf_file)
-                missing_cpf_file = tqdm_ftp(ftp,dir_cpf_to,cpf_file,desc)
+                missing_cpf_file = wget_download(ftp,dir_cpf_file,desc)
                 if missing_cpf_file is not None: missing_cpf_files.append(missing_cpf_file)
 
             ftp.quit()  
@@ -282,9 +284,10 @@ def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',keep=True):
 
         if source == 'CDDIS':
             for dir_cpf_from,cpf_file in zip(dirs_cpf_from,cpf_files):
+                dir_cpf_file = dir_cpf_to + cpf_file
                 url = server+dir_cpf_from+cpf_file
                 desc = 'Downloading {:s}'.format(cpf_file)
-                missing_cpf_file = tqdm_request_cpf(url,dir_cpf_to,cpf_file,desc)
+                missing_cpf_file = wget_download(url,dir_cpf_file,desc)
                 if missing_cpf_file is not None: missing_cpf_files.append(missing_cpf_file)
 
         if source == 'EDC': 
@@ -292,9 +295,10 @@ def cpf_download_prior(satnames = None,date = None,source = 'CDDIS',keep=True):
             ftp.login()  
 
             for dir_cpf_from,cpf_file in zip(dirs_cpf_from,cpf_files):
+                dir_cpf_file = dir_cpf_to + cpf_file
                 ftp.cwd(dir_cpf_from)
                 desc = 'Downloading {:s}'.format(cpf_file)
-                missing_cpf_file = tqdm_ftp(ftp,dir_cpf_to,cpf_file,desc)
+                missing_cpf_file = wget_download(ftp,dir_cpf_file,desc)
                 if missing_cpf_file is not None: missing_cpf_files.append(missing_cpf_file)
 
             ftp.quit()  
