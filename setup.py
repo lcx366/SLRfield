@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='slrfield',
-    version='0.2.0',
+    version='0.2.1',
     description='A package to handle the SLR(Satellite Laser Ranging) data',
     author='Chunxiao Li',
     author_email='lcx366@126.com',

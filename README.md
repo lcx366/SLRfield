@@ -133,6 +133,9 @@ cpf_data_cddis.pred_xyz(t_start,t_end,t_increment)
 
 ## Change log
 
+- **0.2.1 — jul 16, 2023**
+  - Added time system for loading/updating the EOP file and Leap Second file from IERS
+
 - **0.2.0 — Feb 24, 2022**
   
   - Added support for calculating the cartesian coordinates of targets in GCRF
