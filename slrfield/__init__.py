@@ -14,5 +14,5 @@ from .cpf.cpf_download import cpf_download,get_cpf_satlist
 from .slrclasses.cpfclass import CPF
 from .utils import data_prepare
 
-# Load and update the EOP and time files
-data_prepare.time_load()
+# Load and update the EOP file and Leap Second file
+data_prepare.iers_load() 
